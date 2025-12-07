@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NeuroTune</title>
+
+    <!-- Fjalla One (프로젝트 공통 폰트 유지용, 필요하면) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="start_heavyuser_page.css" />
+  </head>
+  <body>
+    <main class="start-heavy-page">
+      <!-- 1. background icon (너가 준 설정 그대로) -->
+      <img
+        src="icon/neurotune_icon.png"
+        alt="NeuroTune background icon"
+        class="bg-logo-icon"
+      />
+
+      <section class="heavy-content">
+        <!-- 2. OO님의 음악 취향을 들려주세요 -->
+        <h1 class="heavy-title">
+          <span id="nickname-placeholder">OO</span>님의 음악 취향을 들려주세요
+        </h1>
+        <p class="genre-limit-text">장르 최대 3개 선택</p>
+
+        <!-- 4. 음악 장르 박스 6개 group -->
+        <section class="genre-section">
+          <div class="genre-scroll">
+            <button class="genre-card">K-POP</button>
+            <button class="genre-card">Indie</button>
+            <button class="genre-card">POP</button>
+            <button class="genre-card">Classic</button>
+            <button class="genre-card">EDM</button>
+            <button class="genre-card">Jazz</button>
+          </div>
+        </section>
+
+        <!-- 5. 장르를 모르겠어요 -->
+        <button class="dont-know-btn">장르를 모르겠어요</button>
+
+        <!-- 6. 맨 아래 1/2 박스 -->
+        <div class="page-indicator">1 / 2</div>
+
+        <img
+          src="icon/right_double_icon.png"
+          alt="next arrow icon"
+          class="right-double-icon"
+        />
+      </section>
+    </main>
+    <script src="start_heavyuser_page.js" defer></script>
+  </body>
+</html>

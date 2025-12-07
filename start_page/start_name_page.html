@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NeuroTune</title>
+
+    <!-- Fjalla One (프로젝트 공통 폰트 유지) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="start_name_page.css" />
+  </head>
+  <body>
+    <main class="start-name-page">
+      <!-- 뒤에 깔리는 NeuroTune logo icon -->
+      <img
+        src="icon/neurotune_icon.png"
+        alt="NeuroTune background icon"
+        class="bg-logo-icon"
+      />
+
+      <section class="start-name-content">
+        <h1 class="start-title">
+          사용할 <span class="highlight">닉네임</span>을 정해주세요
+        </h1>
+
+        <form class="nickname-form">
+          <div class="nickname-field">
+            <input
+              type="text"
+              class="nickname-input"
+              placeholder=""
+              autocomplete="off"
+            />
+            <button type="submit" class="go-button">GO</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>
