@@ -142,8 +142,9 @@ exports.updateProfile = async (req, res) => {
     const { userId } = req.params;
     const updates = req.body;
 
-    // Don't allow password update through this endpoint
+    // Don't allow password update through this endpoint (use separate password change endpoint)
     delete updates.password;
+    // Username is immutable after registration to maintain data consistency
     delete updates.username;
 
     const user = await User.findByIdAndUpdate(
