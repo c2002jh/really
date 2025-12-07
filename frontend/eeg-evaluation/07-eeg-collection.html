@@ -113,11 +113,11 @@
       let evaluationData = [];
 
       document.addEventListener('DOMContentLoaded', async () => {
-        const genres = JSON.parse(localStorage.getItem('neurotune_genres') || '["pop"]');
+        const likedGenres = JSON.parse(localStorage.getItem('neurotune_likedGenres') || localStorage.getItem('neurotune_genres') || '["pop"]');
         const userId = localStorage.getItem('neurotune_userId') || 'anonymous';
 
         // Load songs for evaluation (3 songs per genre)
-        await loadSongsForEvaluation(genres);
+        await loadSongsForEvaluation(likedGenres);
 
         // Initialize UI
         updateUI();
@@ -131,10 +131,69 @@
 
       async function loadSongsForEvaluation(genres) {
         try {
-          // Fetch songs from Spotify for each genre
+          // Fetch 3 songs per liked genre from Spotify
           for (const genre of genres) {
-            const response = await fetch(
-              `${API_BASE_URL}/recommendations?context=general&limit=3`
+            try {
+              // Try to get recommendations from Spotify for this genre
+              const response = await fetch(
+                `${API_BASE_URL}/music/search?q=genre:${genre}&type=track&limit=3`
+              );
+
+              if (response.ok) {
+                const data = await response.json();
+                if (data.data && data.data.length > 0) {
+                  const genreSongs = data.data.slice(0, 3).map(track => ({
+                    id: track.id || `${genre}-${Math.random()}`,
+                    title: track.name || track.title,
+                    artist: Array.isArray(track.artists) ? track.artists.join(', ') : track.artist || '아티스트',
+                    albumCover: track.albumArt || track.albumCover || 'https://via.placeholder.com/300',
+                    genre: genre,
+                    spotifyUrl: track.spotifyUrl || track.external_urls?.spotify || ''
+                  }));
+                  songs.push(...genreSongs);
+                }
+              }
+            } catch (error) {
+              console.warn(`Could not fetch songs for ${genre}, using placeholders`);
+            }
+          }
+
+          // If no songs loaded from API, use placeholder data
+          if (songs.length === 0) {
+            genres.forEach(genre => {
+              for (let i = 1; i <= 3; i++) {
+                songs.push({
+                  id: `${genre}-song-${i}`,
+                  title: `${genre.toUpperCase()} 추천곡 ${i}`,
+                  artist: '아티스트',
+                  albumCover: 'https://via.placeholder.com/300?text=' + genre,
+                  genre: genre,
+                  spotifyUrl: ''
+                });
+              }
+            });
+          }
+
+          document.getElementById('totalSongs').textContent = songs.length;
+          console.log(`Loaded ${songs.length} songs for evaluation`);
+        } catch (error) {
+          console.error('Error loading songs:', error);
+          // Use placeholder data
+          genres.forEach(genre => {
+            for (let i = 1; i <= 3; i++) {
+              songs.push({
+                id: `${genre}-song-${i}`,
+                title: `${genre.toUpperCase()} 추천곡 ${i}`,
+                artist: '아티스트',
+                albumCover: 'https://via.placeholder.com/300?text=' + genre,
+                genre: genre,
+                spotifyUrl: ''
+              });
+            }
+          });
+          document.getElementById('totalSongs').textContent = songs.length;
+        }
+      }/recommendations?context=general&limit=3`
             );
 
             if (response.ok) {
