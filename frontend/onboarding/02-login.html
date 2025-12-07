@@ -307,14 +307,8 @@
 
             alert('로그인 성공!');
             
-            // Navigate based on user progress
-            if (data.data.genres && data.data.genres.length > 0) {
-              // User has completed onboarding, go to main page
-              window.location.href = '../main-page/08-main.html';
-            } else {
-              // User needs to select genres
-              window.location.href = '05-genre-selection.html';
-            }
+            // Go to API verification page first
+            window.location.href = '03-api-verify.html';
           } else {
             showError('password', data.message || '로그인에 실패했습니다');
             loginBtn.disabled = false;

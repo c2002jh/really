@@ -239,28 +239,42 @@
 
       async function loadGenres() {
         try {
-          const response = await fetch(`${API_BASE_URL}/auth/genres`);
-          if (response.ok) {
-            const data = await response.json();
-            const availableGenres = data.data || [];
-            
-            const container = document.getElementById('genreRowsContainer');
-            
-            // Create rows for each category
-            for (const [category, genres] of Object.entries(genreCategories)) {
-              const categoryGenres = genres.filter(g => availableGenres.includes(g));
-              
-              if (categoryGenres.length > 0) {
-                const row = createGenreRow(category, categoryGenres);
-                container.appendChild(row);
-              }
+          const container = document.getElementById('genreRowsContainer');
+          let availableGenres = [];
+          
+          // Try to fetch from Spotify API
+          try {
+            const response = await fetch(`${API_BASE_URL}/auth/genres`);
+            if (response.ok) {
+              const data = await response.json();
+              availableGenres = data.data || [];
             }
-            
-            // Load album covers for all genres
-            loadAlbumCovers();
+          } catch (apiError) {
+            console.warn('Could not fetch from Spotify, using fallback genres');
           }
+          
+          // If no genres from API, use all defined genres as fallback
+          if (availableGenres.length === 0) {
+            availableGenres = Object.values(genreCategories).flat();
+            console.log('Using fallback genres:', availableGenres);
+          }
+          
+          // Create rows for each category
+          for (const [category, genres] of Object.entries(genreCategories)) {
+            const categoryGenres = genres.filter(g => availableGenres.includes(g));
+            
+            if (categoryGenres.length > 0) {
+              const row = createGenreRow(category, categoryGenres);
+              container.appendChild(row);
+            }
+          }
+          
+          // Load album covers for all genres (will use fallback if API fails)
+          loadAlbumCovers();
+          
         } catch (error) {
           console.error('Error loading genres:', error);
+          alert('장르 목록을 불러오는데 실패했습니다. 페이지를 새로고침해주세요.');
         }
       }
 
