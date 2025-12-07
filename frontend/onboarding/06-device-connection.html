@@ -121,16 +121,16 @@
             localStorage.setItem('neurotune_genres', JSON.stringify(genres));
             
             // Navigate to EEG data collection page
-            window.location.href = '../eeg-evaluation/06-eeg-collection.html';
+            window.location.href = '../eeg-evaluation/07-eeg-collection.html';
           } else {
             // If no preferences found, use stored genres
             const genres = JSON.parse(localStorage.getItem('neurotune_genres') || '["pop"]');
-            window.location.href = '../eeg-evaluation/06-eeg-collection.html';
+            window.location.href = '../eeg-evaluation/07-eeg-collection.html';
           }
         } catch (error) {
           console.error('Error fetching preferences:', error);
           // Fallback: proceed anyway
-          window.location.href = '../eeg-evaluation/06-eeg-collection.html';
+          window.location.href = '../eeg-evaluation/07-eeg-collection.html';
         }
       });
     </script>
