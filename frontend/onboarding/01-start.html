@@ -56,6 +56,24 @@
         min-width: 200px;
         padding: 16px 32px;
         font-size: 18px;
+        font-weight: 600;
+      }
+
+      .button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .btn-secondary {
+        background-color: transparent;
+        color: var(--color-dark);
+        border: 2px solid var(--color-line);
+      }
+
+      .btn-secondary:hover {
+        background-color: var(--color-line);
       }
     </style>
   </head>
@@ -72,9 +90,14 @@
         <p class="start-subtitle">EEG로 찾는 나만의 음악 취향</p>
       </section>
 
-      <button class="btn start-btn" onclick="window.location.href='02-api-input.html'">
-        시작하기
-      </button>
+      <div class="button-group">
+        <button class="btn start-btn" onclick="window.location.href='02-signup.html'">
+          회원가입
+        </button>
+        <button class="btn btn-secondary start-btn" onclick="window.location.href='02-login.html'">
+          로그인
+        </button>
+      </div>
     </main>
   </body>
 </html>

@@ -5,6 +5,7 @@ const router = express.Router();
 const authController = require('../controllers/authController');
 const musicController = require('../controllers/musicController');
 const analysisController = require('../controllers/analysisController');
+const userController = require('../controllers/userController');
 
 // Import rate limiters
 const {
@@ -13,6 +14,22 @@ const {
   databaseLimiter,
   readLimiter,
 } = require('../middleware/rateLimiter');
+
+/**
+ * User Authentication Routes
+ */
+
+// Register new user
+router.post('/user/register', generalLimiter, userController.register);
+
+// Login user
+router.post('/user/login', generalLimiter, userController.login);
+
+// Get user profile
+router.get('/user/profile/:userId', readLimiter, userController.getProfile);
+
+// Update user profile
+router.put('/user/profile/:userId', databaseLimiter, userController.updateProfile);
 
 /**
  * Authentication & Spotify Routes
