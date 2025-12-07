@@ -38,6 +38,9 @@ router.put('/user/profile/:userId', databaseLimiter, userController.updateProfil
 // Get available genres
 router.get('/auth/genres', readLimiter, authController.getGenres);
 
+// Get album cover for a genre
+router.get('/auth/genre-cover/:genre', readLimiter, authController.getGenreCover);
+
 // Verify Spotify connection
 router.get('/auth/verify', readLimiter, authController.verifyConnection);
 

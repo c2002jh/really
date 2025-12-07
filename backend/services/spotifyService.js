@@ -172,6 +172,71 @@ class SpotifyService {
       throw new Error('Failed to search tracks on Spotify');
     }
   }
+
+  /**
+   * Get a random album cover for a genre
+   * @param {string} genre - Genre name
+   * @returns {Promise<string>} Album cover URL
+   */
+  async getGenreAlbumCover(genre) {
+    try {
+      const token = await this.getClientCredentialsToken();
+
+      // Search for playlists of this genre to get album covers
+      const params = new URLSearchParams({
+        q: `genre:"${genre}"`,
+        type: 'playlist',
+        limit: '10',
+      });
+
+      const response = await axios.get(
+        `${this.baseURL}/search?${params}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      );
+
+      const playlists = response.data.playlists.items;
+      if (playlists && playlists.length > 0) {
+        // Get a random playlist from the results
+        const randomPlaylist = playlists[Math.floor(Math.random() * playlists.length)];
+        if (randomPlaylist.images && randomPlaylist.images.length > 0) {
+          return randomPlaylist.images[0].url;
+        }
+      }
+
+      // Fallback: search for tracks and get album cover
+      const trackParams = new URLSearchParams({
+        q: `genre:"${genre}"`,
+        type: 'track',
+        limit: '10',
+      });
+
+      const trackResponse = await axios.get(
+        `${this.baseURL}/search?${trackParams}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      );
+
+      const tracks = trackResponse.data.tracks.items;
+      if (tracks && tracks.length > 0) {
+        const randomTrack = tracks[Math.floor(Math.random() * tracks.length)];
+        if (randomTrack.album && randomTrack.album.images && randomTrack.album.images.length > 0) {
+          return randomTrack.album.images[0].url;
+        }
+      }
+
+      return null;
+    } catch (error) {
+      console.error(`Error fetching album cover for genre ${genre}:`, error.response?.data || error.message);
+      return null;
+    }
+  }
 }
 
 module.exports = new SpotifyService();

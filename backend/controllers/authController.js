@@ -27,6 +27,29 @@ exports.getGenres = async (req, res) => {
 };
 
 /**
+ * Get album cover for a specific genre
+ * @route GET /api/auth/genre-cover/:genre
+ */
+exports.getGenreCover = async (req, res) => {
+  try {
+    const { genre } = req.params;
+    const coverUrl = await spotifyService.getGenreAlbumCover(genre);
+    
+    res.status(200).json({
+      success: true,
+      genre: genre,
+      coverUrl: coverUrl,
+    });
+  } catch (error) {
+    console.error('Error in getGenreCover:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to fetch genre cover',
+    });
+  }
+};
+
+/**
  * Verify Spotify connection
  * @route GET /api/auth/verify
  */
