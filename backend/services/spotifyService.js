@@ -44,7 +44,8 @@ class SpotifyService {
 
       this.token = response.data.access_token;
       // Set expiry to 5 minutes before actual expiry for safety
-      this.tokenExpiry = Date.now() + (response.data.expires_in - 300) * 1000;
+      const TOKEN_EXPIRY_BUFFER_SECONDS = 300; // 5 minutes
+      this.tokenExpiry = Date.now() + (response.data.expires_in - TOKEN_EXPIRY_BUFFER_SECONDS) * 1000;
 
       return this.token;
     } catch (error) {

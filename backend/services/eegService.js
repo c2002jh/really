@@ -23,8 +23,11 @@ class EEGService {
         return reject(new Error('All 4 file paths are required: eeg1, eeg2, ecg, gsr'));
       }
 
+      // Use configurable Python command from environment or default to 'python3'
+      const pythonCommand = process.env.PYTHON_COMMAND || 'python3';
+
       // Spawn Python process with file paths as arguments
-      const pythonProcess = spawn('python3', [
+      const pythonProcess = spawn(pythonCommand, [
         scriptPath,
         filePaths.eeg1,
         filePaths.eeg2,

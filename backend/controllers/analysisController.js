@@ -7,6 +7,8 @@ const AnalysisResult = require('../models/AnalysisResult');
 /**
  * Configure Multer for file uploads
  */
+const DEFAULT_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, path.join(__dirname, '../uploads'));
@@ -30,7 +32,7 @@ const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: parseInt(process.env.MAX_FILE_SIZE || '10485760'), // 10MB default
+    fileSize: parseInt(process.env.MAX_FILE_SIZE || DEFAULT_MAX_FILE_SIZE),
   }
 });
 

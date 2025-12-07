@@ -25,6 +25,7 @@ def load_data(filepath):
         return data
     except Exception as e:
         print(f"Error loading {filepath}: {e}", file=sys.stderr)
+        print("Expected file format: numeric values separated by spaces or commas, one value per line or multiple values per line", file=sys.stderr)
         raise
 
 
