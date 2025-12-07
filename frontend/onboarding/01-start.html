@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NeuroTune - 시작</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="../assets/css/common.css" />
+    <style>
+      .start-page {
+        position: fixed;
+        inset: 0;
+        background-color: var(--color-bg);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 48px;
+      }
+
+      .logo-icon {
+        width: 200px;
+        height: auto;
+        animation: pulse 3s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.05); opacity: 0.9; }
+      }
+
+      .start-title {
+        font-family: "Fjalla One", sans-serif;
+        font-size: 64px;
+        margin: 0;
+        color: var(--color-dark);
+        text-shadow: 0 0 20px var(--color-border);
+      }
+
+      .start-subtitle {
+        font-size: 24px;
+        color: var(--color-text-gray);
+        margin: -32px 0 0 0;
+        text-align: center;
+      }
+
+      .start-btn {
+        min-width: 200px;
+        padding: 16px 32px;
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      .button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .btn-secondary {
+        background-color: transparent;
+        color: var(--color-dark);
+        border: 2px solid var(--color-line);
+      }
+
+      .btn-secondary:hover {
+        background-color: var(--color-line);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="start-page fade-in">
+      <img
+        src="../../logo_page/icon/neurotune_icon.png"
+        alt="NeuroTune Icon"
+        class="logo-icon"
+      />
+
+      <section style="text-align: center">
+        <h1 class="start-title">NeuroTune</h1>
+        <p class="start-subtitle">EEG로 찾는 나만의 음악 취향</p>
+      </section>
+
+      <div class="button-group">
+        <button class="btn start-btn" onclick="window.location.href='02-signup.html'">
+          회원가입
+        </button>
+        <button class="btn btn-secondary start-btn" onclick="window.location.href='02-login.html'">
+          로그인
+        </button>
+      </div>
+    </main>
+  </body>
+</html>

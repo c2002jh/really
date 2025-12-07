@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>로그인 - NeuroTune</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="../assets/css/common.css" />
+    <style>
+      .login-page {
+        position: fixed;
+        inset: 0;
+        background-color: var(--color-bg);
+        overflow: hidden;
+      }
+
+      .bg-logo-icon {
+        position: absolute;
+        width: 55vw;
+        height: auto;
+        top: -10vh;
+        left: -10vw;
+        transform: rotate(26.78deg);
+        opacity: 0.5;
+        pointer-events: none;
+        user-select: none;
+        z-index: 0;
+      }
+
+      .login-content {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+      }
+
+      .login-title {
+        margin: 0 16px 16px;
+        color: var(--color-dark);
+        font-size: 36px;
+        font-weight: 700;
+        letter-spacing: -0.07em;
+        text-align: center;
+      }
+
+      .login-subtitle {
+        margin: 0 0 40px 0;
+        color: var(--color-text-gray);
+        font-size: 16px;
+        text-align: center;
+      }
+
+      .login-form {
+        width: 100%;
+        max-width: 420px;
+        background-color: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 40px 32px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--color-dark);
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .form-input {
+        width: 100%;
+        padding: 14px 16px;
+        border: 2px solid var(--color-line);
+        border-radius: 8px;
+        background-color: var(--color-bg);
+        color: var(--color-dark);
+        font-size: 15px;
+        transition: border-color 0.2s;
+      }
+
+      .form-input:focus {
+        outline: none;
+        border-color: var(--color-accent-strong);
+      }
+
+      .form-input::placeholder {
+        color: var(--color-text-gray);
+        opacity: 0.6;
+      }
+
+      .form-input.error {
+        border-color: #e74c3c;
+      }
+
+      .error-message {
+        color: #e74c3c;
+        font-size: 12px;
+        margin-top: 4px;
+        display: none;
+      }
+
+      .error-message.show {
+        display: block;
+      }
+
+      .form-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 28px;
+      }
+
+      .form-actions .btn {
+        width: 100%;
+        padding: 16px 24px;
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .btn-secondary {
+        background-color: var(--color-line);
+        color: var(--color-dark);
+      }
+
+      .btn-secondary:hover {
+        background-color: var(--color-border);
+      }
+
+      .signup-link {
+        text-align: center;
+        margin-top: 20px;
+        color: var(--color-text-gray);
+        font-size: 14px;
+      }
+
+      .signup-link a {
+        color: var(--color-dark);
+        text-decoration: underline;
+        font-weight: 600;
+      }
+
+      .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 24px 0;
+      }
+
+      .divider::before,
+      .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid var(--color-line);
+      }
+
+      .divider span {
+        padding: 0 16px;
+        color: var(--color-text-gray);
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="login-page">
+      <img
+        src="../../logo_page/icon/neurotune_icon.png"
+        alt="NeuroTune background icon"
+        class="bg-logo-icon"
+      />
+
+      <section class="login-content fade-in">
+        <h1 class="login-title">환영합니다!</h1>
+        <p class="login-subtitle">
+          NeuroTune에 로그인하세요
+        </p>
+
+        <form class="login-form" id="loginForm">
+          <div class="form-group">
+            <label class="form-label" for="username">
+              아이디
+            </label>
+            <input
+              type="text"
+              class="form-input"
+              id="username"
+              placeholder="아이디 입력"
+              autocomplete="off"
+              required
+            />
+            <span class="error-message" id="usernameError"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password">
+              비밀번호
+            </label>
+            <input
+              type="password"
+              class="form-input"
+              id="password"
+              placeholder="비밀번호 입력"
+              required
+            />
+            <span class="error-message" id="passwordError"></span>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn" id="loginBtn">
+              로그인
+            </button>
+          </div>
+
+          <div class="divider">
+            <span>또는</span>
+          </div>
+
+          <div class="signup-link">
+            계정이 없으신가요? <a href="02-signup.html">회원가입</a>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script>
+      const API_BASE_URL = 'http://localhost:5000/api';
+      
+      const form = document.getElementById('loginForm');
+      const loginBtn = document.getElementById('loginBtn');
+      const username = document.getElementById('username');
+      const password = document.getElementById('password');
+
+      function showError(inputId, message) {
+        const input = document.getElementById(inputId);
+        const errorElement = document.getElementById(inputId + 'Error');
+        input.classList.add('error');
+        errorElement.textContent = message;
+        errorElement.classList.add('show');
+      }
+
+      function clearError(inputId) {
+        const input = document.getElementById(inputId);
+        const errorElement = document.getElementById(inputId + 'Error');
+        input.classList.remove('error');
+        errorElement.classList.remove('show');
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Clear previous errors
+        clearError('username');
+        clearError('password');
+
+        if (!username.value.trim()) {
+          showError('username', '아이디를 입력해주세요');
+          return;
+        }
+
+        if (!password.value) {
+          showError('password', '비밀번호를 입력해주세요');
+          return;
+        }
+
+        loginBtn.disabled = true;
+        loginBtn.textContent = '로그인 중...';
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/user/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              username: username.value.trim(),
+              password: password.value,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            // Save user data to localStorage
+            localStorage.setItem('neurotune_userId', data.data.userId);
+            localStorage.setItem('neurotune_username', data.data.username);
+            localStorage.setItem('neurotune_nickname', data.data.nickname);
+            localStorage.setItem('neurotune_apiKeys', JSON.stringify(data.data.apiKeys));
+            
+            if (data.data.genres && data.data.genres.length > 0) {
+              localStorage.setItem('neurotune_genres', JSON.stringify(data.data.genres));
+            }
+
+            alert('로그인 성공!');
+            
+            // Go to API verification page first
+            window.location.href = '03-api-verify.html';
+          } else {
+            showError('password', data.message || '로그인에 실패했습니다');
+            loginBtn.disabled = false;
+            loginBtn.textContent = '로그인';
+          }
+        } catch (error) {
+          console.error('Login error:', error);
+          alert('서버 연결에 실패했습니다. 백엔드가 실행 중인지 확인해주세요.');
+          loginBtn.disabled = false;
+          loginBtn.textContent = '로그인';
+        }
+      });
+
+      // Real-time validation
+      username.addEventListener('input', () => clearError('username'));
+      password.addEventListener('input', () => clearError('password'));
+    </script>
+  </body>
+</html>

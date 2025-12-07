@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroTune Flow Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+        }
+        .flow-step {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .flow-step a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .flow-step a:hover {
+            text-decoration: underline;
+        }
+        .arrow {
+            text-align: center;
+            font-size: 24px;
+            color: #666;
+            margin: 10px 0;
+        }
+        .git-history {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #007bff;
+            font-size: 12px;
+            font-family: monospace;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧠 NeuroTune 페이지 흐름 테스트</h1>
+    
+    <div class="git-history">
+        <strong>📝 Git Commits:</strong> 275aaa6 2025-12-07 20:13 Split liked/disliked genre selection + genre-based songs | 04660d0 2025-12-07 19:56 API verification page | 5cd52c7 2025-12-07 19:44 Horizontal scrolling genre selection with Spotify covers | b1efbb0 2025-12-07 19:36 Skip API connect page | ad98ef3 2025-12-07 18:29 Backend dependencies setup | 2f9ce09 2025-12-07 08:04 GitHub token docs | dfa55c3 2025-12-07 08:02 Login/signup system | 59ae10a 2025-12-07 07:49 API input page | 213d963 2025-12-07 07:39 Connected flow + AI + Spotify | efdfab0 2025-12-07 07:22 Quickstart guide | 5cc68bd 2025-12-07 07:20 Complete frontend | 896b887 2025-12-07 15:50 PDF upload | 00db3df 2025-12-07 06:30 Security docs | f1ef853 2025-12-07 06:29 Dependency upgrades | ff2b8e9 2025-12-07 06:24 API reference | de7f1a2 2025-12-07 06:22 Deployment guide | a055e17 2025-12-07 06:20 Rate limiting | 2d81514 2025-12-07 06:17 Code review fixes | 17f53d3 2025-12-07 06:15 Multer fix + testing | b9f7d40 2025-12-07 06:12 Complete backend | a9dc517 2025-12-07 06:06 Initial plan
+    </div>
+    
+    <p>아래 링크를 순서대로 클릭하여 페이지 흐름이 올바른지 확인하세요.</p>
+    
+    <div class="flow-step">
+        <strong>1. 시작 페이지</strong><br>
+        <a href="onboarding/01-start.html" target="_blank">onboarding/01-start.html</a>
+        <p style="font-size:12px;color:#666;margin:5px 0 0 0;">회원가입 또는 로그인 선택</p>
+    </div>
+    
+    <div class="arrow">↓</div>
+    
+    <div class="flow-step">
+        <strong>2. 로그인 / 회원가입</strong><br>
+        <a href="onboarding/02-login.html" target="_blank">02-login.html</a> | 
+        <a href="onboarding/02-signup.html" target="_blank">02-signup.html</a>
+        <p style="font-size:12px;color:#666;margin:5px 0 0 0;">회원가입 시 아이디, 비밀번호, 닉네임, API 키 입력</p>
+    </div>
+    
+    <div class="arrow">↓</div>
+    
+    <div class="flow-step">
+        <strong>3. API 연결 확인</strong><br>
+        <a href="onboarding/03-api-verify.html" target="_blank">onboarding/03-api-verify.html</a>
+        <p style="font-size:12px;color:#666;margin:5px 0 0 0;">Spotify, MongoDB, Backend 서버 상태 확인</p>
+    </div>
+    
+    <div class="arrow">↓</div>
+    
+    <div class="flow-step">
+        <strong>4. 좋아하는 장르 선택</strong><br>
+        <a href="onboarding/05-genre-selection-liked.html" target="_blank">05-genre-selection-liked.html</a>
+        <p style="font-size:12px;color:#666;margin:5px 0 0 0;">최대 5개, Spotify 앨범 커버 표시 (플레이리스트 X)</p>
+    </div>
+    
+    <div class="arrow">↓</div>
+    
+    <div class="flow-step">
+        <strong>5. 싫어하는 장르 선택</strong><br>
+        <a href="onboarding/05-genre-selection-disliked.html" target="_blank">05-genre-selection-disliked.html</a>
+        <p style="font-size:12px;color:#666;margin:5px 0 0 0;">최대 3개, Spotify 앨범 커버 표시 (플레이리스트 X)</p>
+    </div>
+    
+    <div class="arrow">↓</div>
+    
+    <div class="flow-step">
+        <strong>6. 기기 연결</strong><br>
+        <a href="onboarding/06-device-connection.html" target="_blank">onboarding/06-device-connection.html</a>
+        <p style="font-size:12px;color:#666;margin:5px 0 0 0;">EEG 기기 페어링 애니메이션</p>
+    </div>
+    
+    <div class="arrow">↓</div>
+    
+    <div class="flow-step">
+        <strong>7. 뇌파 데이터 수집</strong><br>
+        <a href="eeg-evaluation/07-eeg-collection.html" target="_blank">eeg-evaluation/07-eeg-collection.html</a>
+        <p style="font-size:12px;color:#666;margin:5px 0 0 0;">장르별 랜덤 노래 3곡, 재생/멈춤 버튼, 4개 EEG 파일 업로드</p>
+    </div>
+    
+    <div class="arrow">↓</div>
+    
+    <div class="flow-step">
+        <strong>8. 메인 페이지 (AI 분석 & 추천)</strong><br>
+        <a href="main-page/08-main.html" target="_blank">main-page/08-main.html</a>
+        <p style="font-size:12px;color:#666;margin:5px 0 0 0;">AI 분석, Spotify 검색, 컨텍스트 기반 추천</p>
+    </div>
+    
+    <hr style="margin: 30px 0;">
+    
+    <h2>✅ 확인 사항</h2>
+    <ul>
+        <li>✅ 모든 포트가 <strong>5000</strong>으로 통일됨 (백엔드 & 프론트엔드 API 호출)</li>
+        <li>✅ 좋아하는/싫어하는 장르 선택 2단계 분리</li>
+        <li>✅ Spotify <strong>앨범 커버만</strong> 표시 (플레이리스트 커버 X)</li>
+        <li>✅ EEG 수집에서 장르별 랜덤 노래 추천 + 재생/멈춤 버튼</li>
+        <li>✅ 로그인/회원가입 시스템 (닉네임 페이지 통합)</li>
+        <li>✅ API 연결 상태 확인 페이지</li>
+        <li>데이터가 LocalStorage에 올바르게 저장되는지 확인 (개발자 도구 → Application → Local Storage)</li>
+        <li>각 페이지의 "다음" 버튼이 올바른 다음 페이지로 이동하는지 확인</li>
+    </ul>
+    
+    <h2>🚀 실행 방법</h2>
+    <pre style="background:#f8f9fa;padding:15px;border-radius:8px;">
+# 백엔드 시작
+cd backend && npm install && npm start
+
+# 프론트엔드 시작 (새 터미널)
+cd frontend && python3 -m http.server 8080
+
+# 접속: http://localhost:8080/onboarding/01-start.html
+# 또는: http://localhost:8080/flow-test.html
+    </pre>
+    
+    <h2>🔧 포트 설정</h2>
+    <ul>
+        <li><strong>Backend API:</strong> Port 5000 (http://localhost:5000)</li>
+        <li><strong>Frontend Server:</strong> Port 8080 (http://localhost:8080)</li>
+        <li><strong>API Base URL:</strong> http://localhost:5000/api (모든 프론트엔드 파일에서 사용)</li>
+    </ul>
+</body>
+</html>

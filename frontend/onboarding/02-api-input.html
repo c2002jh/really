@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API 설정 - NeuroTune</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="../assets/css/common.css" />
+    <style>
+      .api-input-page {
+        position: fixed;
+        inset: 0;
+        background-color: var(--color-bg);
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+
+      .bg-logo-icon {
+        position: fixed;
+        width: 55vw;
+        height: auto;
+        top: -10vh;
+        left: -10vw;
+        transform: rotate(26.78deg);
+        opacity: 0.5;
+        pointer-events: none;
+        user-select: none;
+        z-index: 0;
+      }
+
+      .api-input-content {
+        position: relative;
+        width: 100%;
+        min-height: 100vh;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+      }
+
+      .api-input-title {
+        margin: 0 16px 16px;
+        color: var(--color-dark);
+        font-size: 32px;
+        font-weight: 400;
+        letter-spacing: -0.07em;
+        text-align: center;
+      }
+
+      .api-input-subtitle {
+        margin: 0 0 40px 0;
+        color: var(--color-text-gray);
+        font-size: 16px;
+        text-align: center;
+        max-width: 600px;
+      }
+
+      .api-form {
+        width: 100%;
+        max-width: 600px;
+        background-color: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 32px;
+      }
+
+      .form-group {
+        margin-bottom: 24px;
+      }
+
+      .form-label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--color-dark);
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .form-help {
+        display: block;
+        margin-top: 4px;
+        color: var(--color-text-gray);
+        font-size: 12px;
+      }
+
+      .form-input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid var(--color-line);
+        border-radius: 8px;
+        background-color: var(--color-bg);
+        color: var(--color-dark);
+        font-size: 14px;
+        font-family: monospace;
+        transition: border-color 0.2s;
+      }
+
+      .form-input:focus {
+        outline: none;
+        border-color: var(--color-accent-strong);
+      }
+
+      .form-input::placeholder {
+        color: var(--color-text-gray);
+        opacity: 0.6;
+      }
+
+      .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 32px;
+      }
+
+      .form-actions .btn {
+        flex: 1;
+        padding: 14px 24px;
+      }
+
+      .btn-secondary {
+        background-color: var(--color-line);
+        color: var(--color-dark);
+      }
+
+      .btn-secondary:hover {
+        background-color: var(--color-border);
+      }
+
+      .skip-text {
+        text-align: center;
+        margin-top: 16px;
+        color: var(--color-text-gray);
+        font-size: 12px;
+      }
+
+      .api-info {
+        background-color: #fff3cd;
+        border: 1px solid #ffc107;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 24px;
+      }
+
+      .api-info-title {
+        font-weight: 600;
+        color: #856404;
+        margin: 0 0 8px 0;
+        font-size: 14px;
+      }
+
+      .api-info-text {
+        color: #856404;
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .api-info-text a {
+        color: #856404;
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="api-input-page">
+      <img
+        src="../../logo_page/icon/neurotune_icon.png"
+        alt="NeuroTune background icon"
+        class="bg-logo-icon"
+      />
+
+      <section class="api-input-content fade-in">
+        <h1 class="api-input-title">API 키 설정</h1>
+        <p class="api-input-subtitle">
+          NeuroTune의 모든 기능을 사용하려면 API 키가 필요합니다.<br />
+          테스트용으로 스킵하고 진행할 수도 있습니다.
+        </p>
+
+        <form class="api-form" id="apiForm">
+          <div class="api-info">
+            <p class="api-info-title">🔑 API 키 발급 방법</p>
+            <p class="api-info-text">
+              • <strong>Spotify:</strong> <a href="https://developer.spotify.com/dashboard" target="_blank">developer.spotify.com</a>에서 앱 생성<br />
+              • <strong>MongoDB:</strong> <a href="https://www.mongodb.com/cloud/atlas" target="_blank">MongoDB Atlas</a>에서 무료 클러스터 생성<br />
+              • <strong>GitHub Copilot:</strong> <a href="https://github.com/settings/copilot" target="_blank">GitHub Settings</a>에서 API 키 발급
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="spotifyClientId">
+              Spotify Client ID
+            </label>
+            <input
+              type="text"
+              class="form-input"
+              id="spotifyClientId"
+              placeholder="your_spotify_client_id"
+              autocomplete="off"
+            />
+            <span class="form-help">Spotify Developer Dashboard에서 확인</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="spotifyClientSecret">
+              Spotify Client Secret
+            </label>
+            <input
+              type="password"
+              class="form-input"
+              id="spotifyClientSecret"
+              placeholder="your_spotify_client_secret"
+              autocomplete="off"
+            />
+            <span class="form-help">Spotify Developer Dashboard에서 확인</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="mongodbUri">
+              MongoDB URI
+            </label>
+            <input
+              type="text"
+              class="form-input"
+              id="mongodbUri"
+              placeholder="mongodb+srv://username:password@cluster.mongodb.net/neurotune"
+              autocomplete="off"
+            />
+            <span class="form-help">MongoDB Atlas connection string</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="copilotApiKey">
+              GitHub Copilot API Key (선택)
+            </label>
+            <input
+              type="password"
+              class="form-input"
+              id="copilotApiKey"
+              placeholder="ghp_..."
+              autocomplete="off"
+            />
+            <span class="form-help">AI 분석 기능에 사용됩니다 (선택사항)</span>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" id="skipBtn">
+              스킵 (테스트 모드)
+            </button>
+            <button type="submit" class="btn" id="saveBtn">
+              저장하고 계속
+            </button>
+          </div>
+
+          <p class="skip-text">
+            * 테스트 모드에서는 실제 API 연결 없이 데모 데이터로 진행됩니다
+          </p>
+        </form>
+      </section>
+    </main>
+
+    <script>
+      const form = document.getElementById('apiForm');
+      const skipBtn = document.getElementById('skipBtn');
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        // Get API key values
+        const apiKeys = {
+          spotifyClientId: document.getElementById('spotifyClientId').value.trim(),
+          spotifyClientSecret: document.getElementById('spotifyClientSecret').value.trim(),
+          mongodbUri: document.getElementById('mongodbUri').value.trim(),
+          copilotApiKey: document.getElementById('copilotApiKey').value.trim(),
+          testMode: false
+        };
+        
+        // Save to localStorage
+        localStorage.setItem('neurotune_apiKeys', JSON.stringify(apiKeys));
+        
+        // Navigate to nickname page
+        window.location.href = '03-nickname.html';
+      });
+
+      skipBtn.addEventListener('click', () => {
+        // Save test mode flag
+        const apiKeys = {
+          spotifyClientId: '',
+          spotifyClientSecret: '',
+          mongodbUri: '',
+          copilotApiKey: '',
+          testMode: true
+        };
+        
+        localStorage.setItem('neurotune_apiKeys', JSON.stringify(apiKeys));
+        
+        // Navigate to nickname page
+        window.location.href = '03-nickname.html';
+      });
+
+      // Check if user is returning (has nickname already)
+      window.addEventListener('DOMContentLoaded', () => {
+        const savedKeys = localStorage.getItem('neurotune_apiKeys');
+        if (savedKeys) {
+          try {
+            const keys = JSON.parse(savedKeys);
+            if (keys.spotifyClientId) document.getElementById('spotifyClientId').value = keys.spotifyClientId;
+            if (keys.spotifyClientSecret) document.getElementById('spotifyClientSecret').value = keys.spotifyClientSecret;
+            if (keys.mongodbUri) document.getElementById('mongodbUri').value = keys.mongodbUri;
+            if (keys.copilotApiKey) document.getElementById('copilotApiKey').value = keys.copilotApiKey;
+          } catch (e) {
+            console.error('Error loading saved keys:', e);
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
