@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API 연결 - NeuroTune</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="../assets/css/common.css" />
+    <style>
+      .api-content {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 32px;
+      }
+
+      .api-title {
+        margin: 0;
+        font-size: 32px;
+        font-weight: 400;
+        letter-spacing: -0.07em;
+        text-align: center;
+        color: var(--color-dark);
+      }
+
+      .api-status {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 32px;
+        background-color: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        min-width: 400px;
+      }
+
+      .status-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px;
+        border-radius: 8px;
+        background-color: var(--color-bg);
+      }
+
+      .status-label {
+        font-size: 16px;
+        color: var(--color-dark);
+      }
+
+      .status-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: var(--color-border);
+      }
+
+      .status-indicator.connected {
+        background-color: #4ade80;
+        animation: pulse-glow 2s infinite;
+      }
+
+      @keyframes pulse-glow {
+        0%, 100% { box-shadow: 0 0 5px #4ade80; }
+        50% { box-shadow: 0 0 15px #4ade80; }
+      }
+
+      .continue-btn {
+        min-width: 200px;
+        padding: 14px 32px;
+        font-size: 16px;
+      }
+
+      .continue-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page-wrapper">
+      <img
+        src="../../logo_page/icon/neurotune_icon.png"
+        alt="NeuroTune background icon"
+        class="bg-logo-icon"
+      />
+
+      <section class="api-content fade-in">
+        <h1 class="api-title">시스템 연결 중...</h1>
+
+        <div class="api-status">
+          <div class="status-item">
+            <span class="status-label">Spotify API</span>
+            <div class="status-indicator" id="spotifyStatus"></div>
+          </div>
+          <div class="status-item">
+            <span class="status-label">데이터베이스</span>
+            <div class="status-indicator" id="dbStatus"></div>
+          </div>
+          <div class="status-item">
+            <span class="status-label">사용자 정보 저장</span>
+            <div class="status-indicator" id="userStatus"></div>
+          </div>
+        </div>
+
+        <button class="btn continue-btn" id="continueBtn" disabled>
+          다음 단계
+        </button>
+      </section>
+    </main>
+
+    <script>
+      const API_BASE_URL = 'http://localhost:5000/api';
+
+      async function checkConnections() {
+        const userId = localStorage.getItem('neurotune_userId') || 'anonymous';
+        let allConnected = false;
+
+        try {
+          // Check Spotify connection
+          const spotifyResponse = await fetch(`${API_BASE_URL}/auth/verify`);
+          if (spotifyResponse.ok) {
+            document.getElementById('spotifyStatus').classList.add('connected');
+          }
+
+          // Check database health
+          const healthResponse = await fetch(`${API_BASE_URL}/health`);
+          if (healthResponse.ok) {
+            document.getElementById('dbStatus').classList.add('connected');
+          }
+
+          // Save user to preferences (initialize)
+          const saveResponse = await fetch(`${API_BASE_URL}/preferences`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: userId,
+              genres: [] // Will be set in next step
+            })
+          });
+
+          if (saveResponse.ok || saveResponse.status === 400) {
+            // 400 means user already exists, which is fine
+            document.getElementById('userStatus').classList.add('connected');
+          }
+
+          // Enable continue button
+          allConnected = true;
+          document.getElementById('continueBtn').disabled = false;
+
+        } catch (error) {
+          console.error('Connection error:', error);
+          setTimeout(checkConnections, 2000); // Retry after 2 seconds
+        }
+      }
+
+      document.getElementById('continueBtn').addEventListener('click', () => {
+        window.location.href = '04-genre-selection.html';
+      });
+
+      // Start checking connections
+      checkConnections();
+    </script>
+  </body>
+</html>

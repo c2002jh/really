@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>음악 평가 - NeuroTune</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="../assets/css/common.css" />
+    <link rel="stylesheet" href="06-eeg-collection.css" />
+  </head>
+  <body>
+    <main class="page-wrapper">
+      <!-- Background icon -->
+      <img
+        src="../../logo_page/icon/neurotune_icon.png"
+        alt="NeuroTune background icon"
+        class="bg-logo-icon"
+      />
+
+      <section class="evaluation-content">
+        <!-- Progress indicator -->
+        <div class="progress-bar">
+          <div class="progress-text">
+            <span id="currentSong">1</span> / <span id="totalSongs">18</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+
+        <!-- Genre label -->
+        <div class="genre-label" id="genreLabel">K-POP</div>
+
+        <!-- Song info -->
+        <div class="song-info fade-in">
+          <div class="album-cover">
+            <img id="albumCover" src="https://via.placeholder.com/300" alt="Album cover" />
+          </div>
+
+          <h2 class="song-title" id="songTitle">곡 제목</h2>
+          <p class="artist-name" id="artistName">아티스트</p>
+        </div>
+
+        <!-- File upload area -->
+        <div class="upload-section">
+          <p class="upload-instruction">EEG 데이터를 업로드해주세요 (4개 파일)</p>
+
+          <div class="upload-grid">
+            <div class="upload-box" data-file="rawdata">
+              <input type="file" id="file-rawdata" accept=".txt" />
+              <label for="file-rawdata">
+                <div class="upload-icon">📄</div>
+                <span class="upload-label">Rawdata.txt</span>
+                <span class="upload-status"></span>
+              </label>
+            </div>
+
+            <div class="upload-box" data-file="fp1">
+              <input type="file" id="file-fp1" accept=".txt" />
+              <label for="file-fp1">
+                <div class="upload-icon">📄</div>
+                <span class="upload-label">Fp1_FFT.txt</span>
+                <span class="upload-status"></span>
+              </label>
+            </div>
+
+            <div class="upload-box" data-file="fp2">
+              <input type="file" id="file-fp2" accept=".txt" />
+              <label for="file-fp2">
+                <div class="upload-icon">📄</div>
+                <span class="upload-label">Fp2_FFT.txt</span>
+                <span class="upload-status"></span>
+              </label>
+            </div>
+
+            <div class="upload-box" data-file="biomarkers">
+              <input type="file" id="file-biomarkers" accept=".txt" />
+              <label for="file-biomarkers">
+                <div class="upload-icon">📄</div>
+                <span class="upload-label">Biomarkers.txt</span>
+                <span class="upload-status"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Next song button -->
+        <button class="btn next-song-btn" id="nextSongBtn" disabled>
+          다음 곡
+        </button>
+
+        <!-- Loading overlay -->
+        <div class="loading-overlay" id="loadingOverlay" style="display: none">
+          <div class="loading"></div>
+          <p>EEG 데이터 분석 중...</p>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const API_BASE_URL = 'http://localhost:5000/api';
+
+      let currentSongIndex = 0;
+      let songs = [];
+      let uploadedFiles = {};
+      let evaluationData = [];
+
+      document.addEventListener('DOMContentLoaded', async () => {
+        const genres = JSON.parse(localStorage.getItem('neurotune_genres') || '["pop"]');
+        const userId = localStorage.getItem('neurotune_userId') || 'anonymous';
+
+        // Load songs for evaluation (3 songs per genre)
+        await loadSongsForEvaluation(genres);
+
+        // Initialize UI
+        updateUI();
+
+        // Set up file upload handlers
+        setupFileUploads();
+
+        // Set up next button
+        document.getElementById('nextSongBtn').addEventListener('click', handleNextSong);
+      });
+
+      async function loadSongsForEvaluation(genres) {
+        try {
+          // Fetch songs from Spotify for each genre
+          for (const genre of genres) {
+            const response = await fetch(
+              `${API_BASE_URL}/recommendations?context=general&limit=3`
+            );
+
+            if (response.ok) {
+              const data = await response.json();
+              const genreSongs = data.data.slice(0, 3).map(track => ({
+                id: track.id,
+                title: track.name,
+                artist: track.artists.join(', '),
+                albumCover: track.albumArt,
+                genre: genre,
+                spotifyUrl: track.spotifyUrl
+              }));
+              songs.push(...genreSongs);
+            }
+          }
+
+          // If no songs loaded, use placeholder data
+          if (songs.length === 0) {
+            genres.forEach(genre => {
+              for (let i = 1; i <= 3; i++) {
+                songs.push({
+                  id: `${genre}-song-${i}`,
+                  title: `${genre} 곡 ${i}`,
+                  artist: '아티스트',
+                  albumCover: 'https://via.placeholder.com/300',
+                  genre: genre,
+                  spotifyUrl: ''
+                });
+              }
+            });
+          }
+
+          document.getElementById('totalSongs').textContent = songs.length;
+        } catch (error) {
+          console.error('Error loading songs:', error);
+          // Use placeholder data
+          genres.forEach(genre => {
+            for (let i = 1; i <= 3; i++) {
+              songs.push({
+                id: `${genre}-song-${i}`,
+                title: `${genre} 곡 ${i}`,
+                artist: '아티스트',
+                albumCover: 'https://via.placeholder.com/300',
+                genre: genre,
+                spotifyUrl: ''
+              });
+            }
+          });
+          document.getElementById('totalSongs').textContent = songs.length;
+        }
+      }
+
+      function updateUI() {
+        const song = songs[currentSongIndex];
+        
+        document.getElementById('currentSong').textContent = currentSongIndex + 1;
+        document.getElementById('genreLabel').textContent = song.genre.toUpperCase();
+        document.getElementById('songTitle').textContent = song.title;
+        document.getElementById('artistName').textContent = song.artist;
+        document.getElementById('albumCover').src = song.albumCover;
+
+        // Update progress bar
+        const progress = ((currentSongIndex + 1) / songs.length) * 100;
+        document.getElementById('progressFill').style.width = `${progress}%`;
+
+        // Reset upload boxes
+        document.querySelectorAll('.upload-box').forEach(box => {
+          box.classList.remove('uploaded');
+          box.querySelector('.upload-status').textContent = '';
+        });
+
+        uploadedFiles = {};
+        updateNextButton();
+      }
+
+      function setupFileUploads() {
+        const fileInputs = ['rawdata', 'fp1', 'fp2', 'biomarkers'];
+
+        fileInputs.forEach(fileType => {
+          const input = document.getElementById(`file-${fileType}`);
+          const box = document.querySelector(`.upload-box[data-file="${fileType}"]`);
+
+          input.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+              uploadedFiles[fileType] = file;
+              box.classList.add('uploaded');
+              box.querySelector('.upload-status').textContent = file.name;
+              updateNextButton();
+            }
+          });
+        });
+      }
+
+      function updateNextButton() {
+        const allFilesUploaded = ['rawdata', 'fp1', 'fp2', 'biomarkers'].every(
+          type => uploadedFiles[type]
+        );
+
+        document.getElementById('nextSongBtn').disabled = !allFilesUploaded;
+      }
+
+      async function handleNextSong() {
+        const userId = localStorage.getItem('neurotune_userId') || 'anonymous';
+        const currentSong = songs[currentSongIndex];
+
+        // Show loading overlay
+        document.getElementById('loadingOverlay').style.display = 'flex';
+
+        try {
+          // Prepare form data
+          const formData = new FormData();
+          formData.append('eeg1', uploadedFiles['rawdata']);
+          formData.append('eeg2', uploadedFiles['fp1']);
+          formData.append('ecg', uploadedFiles['fp2']);
+          formData.append('gsr', uploadedFiles['biomarkers']);
+          formData.append('userId', userId);
+
+          // Send to backend for analysis
+          const response = await fetch(`${API_BASE_URL}/analyze`, {
+            method: 'POST',
+            body: formData
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+            
+            // Store evaluation data
+            evaluationData.push({
+              songId: currentSong.id,
+              genre: currentSong.genre,
+              results: result.data.results
+            });
+
+            // Move to next song or finish
+            currentSongIndex++;
+
+            if (currentSongIndex < songs.length) {
+              // Hide loading and show next song
+              document.getElementById('loadingOverlay').style.display = 'none';
+              updateUI();
+            } else {
+              // All songs evaluated, go to main page
+              localStorage.setItem('neurotune_evaluationComplete', 'true');
+              window.location.href = '../main-page/07-main.html';
+            }
+          } else {
+            throw new Error('Analysis failed');
+          }
+        } catch (error) {
+          console.error('Error analyzing EEG data:', error);
+          alert('EEG 데이터 분석 중 오류가 발생했습니다. 다시 시도해주세요.');
+          document.getElementById('loadingOverlay').style.display = 'none';
+        }
+      }
+    </script>
+  </body>
+</html>

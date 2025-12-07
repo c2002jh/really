@@ -151,9 +151,206 @@ body {
   color: var(--color-dark);
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.btn-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  background-color: white;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-icon:hover {
+  border-color: var(--color-accent-strong);
+  background-color: var(--color-accent-soft);
+  transform: scale(1.1);
+}
+
 .user-info {
   font-size: 16px;
   color: var(--color-text-gray);
+}
+
+/* AI Analysis Modal */
+.ai-analysis-modal {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s;
+}
+
+.ai-modal-content {
+  position: relative;
+  background-color: white;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s;
+}
+
+.ai-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background-color: transparent;
+  font-size: 28px;
+  cursor: pointer;
+  color: var(--color-text-gray);
+}
+
+.ai-close-btn:hover {
+  color: var(--color-dark);
+}
+
+.ai-analysis-result {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.ai-analysis-content h4 {
+  margin: 16px 0 8px 0;
+  color: var(--color-dark);
+}
+
+.ai-analysis-content p {
+  line-height: 1.6;
+  color: var(--color-dark);
+}
+
+.ai-recommendations ul {
+  text-align: left;
+  padding-left: 20px;
+}
+
+.ai-recommendations li {
+  margin: 8px 0;
+  line-height: 1.5;
+}
+
+/* Search Section */
+.search-section {
+  margin-bottom: 32px;
+  position: relative;
+}
+
+.search-box {
+  display: flex;
+  gap: 8px;
+  max-width: 600px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 12px 20px;
+  border: 2px solid var(--color-border);
+  border-radius: 999px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.search-input:focus {
+  border-color: var(--color-accent-strong);
+}
+
+.search-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background-color: var(--color-accent-strong);
+  font-size: 20px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.search-btn:hover {
+  transform: scale(1.1);
+}
+
+.search-results {
+  position: absolute;
+  top: 60px;
+  left: 0;
+  right: 0;
+  max-width: 600px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.search-result-item:hover {
+  background-color: var(--color-bg);
+}
+
+.search-result-item img {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.search-result-info {
+  flex: 1;
+}
+
+.search-result-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-dark);
+  margin-bottom: 4px;
+}
+
+.search-result-artist {
+  font-size: 12px;
+  color: var(--color-text-gray);
+}
+
+.play-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background-color: var(--color-accent-strong);
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.play-btn:hover {
+  transform: scale(1.1);
 }
 
 /* Section Titles */
@@ -212,11 +409,18 @@ body {
 }
 
 .album-title {
-  margin: 12px 0 0 0;
+  margin: 12px 0 4px 0;
   font-size: 14px;
   font-weight: 500;
   text-align: center;
   color: var(--color-dark);
+}
+
+.album-artist {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-gray);
+  text-align: center;
 }
 
 /* Context Section */
@@ -319,6 +523,22 @@ body {
   font-size: 14px;
   color: var(--color-accent-strong);
   font-weight: 600;
+  margin-right: 12px;
+}
+
+.playlist-play-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background-color: var(--color-accent-strong);
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.playlist-play-btn:hover {
+  transform: scale(1.1);
 }
 
 /* Responsive */
