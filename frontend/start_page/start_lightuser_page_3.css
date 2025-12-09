@@ -1,0 +1,263 @@
+:root {
+  --page-top-offset: 170px; /* 조정: 이 값을 낮춰서 전체를 덜 내리도록 설정했습니다 */
+  --page-side-offset: 80px; /* <-- 왼쪽/오른쪽 여백(여기 값을 키우면 레이아웃이 좌/우로 더 내려앉음) */
+  --bg: #ededed;
+  --card-bg: #ffffff;
+  --card-radius: 12px;
+  --shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  --accent: #f2ffbc; /* pale green fill used for text */
+  --text: #3c3c3c; /* darker stroke color */
+}
+
+/* Reset */
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+/* background logo (same as page 2) */
+.bg-logo-icon {
+  position: absolute;
+  width: 55vw;
+  top: -10vh;
+  left: -10vw;
+  transform: rotate(26.78deg);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* dark overlay like page_2 */
+.dark-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.25);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* layout: use the CSS variable so you can change top offset in one place */
+.results-wrap {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 40px;
+  padding: var(--page-top-offset) var(--page-side-offset) 60px; /* <- side offset applied here */
+  box-sizing: border-box;
+}
+
+/* LEFT STATUS COLUMN
+   Absolutely position the column so its top aligns exactly with results-wrap padding.
+   This makes the Good/Bad icons follow the same vertical offset as the card groups. */
+.status-column {
+  position: absolute;
+  left: calc(
+    var(--page-side-offset) - 4px
+  ); /* <-- follows side offset so whole layout stays centered */
+  top: calc(
+    var(--page-top-offset) + 0px
+  ); /* <-- matches results-wrap top padding */
+  width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 40px;
+  pointer-events: none;
+  z-index: 4;
+}
+.status-item {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Slight visual glow for icons */
+.status-item.good img,
+.status-item.bad img {
+  width: 44px;
+  height: 44px;
+  filter: drop-shadow(0 6px 18px rgba(242, 255, 188, 0.45));
+}
+
+/* cards column */
+.cards-column {
+  flex: 1;
+  max-width: 980px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+/* group row - allow visible overlap */
+.cards-group {
+  width: 100%;
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  flex-wrap: nowrap;
+  position: relative;
+  align-items: center;
+  overflow: visible;
+  padding: 0 40px;
+}
+
+/* card: size & appearance */
+.card {
+  min-width: 280px;
+  height: 140px;
+  background: var(--card-bg);
+  border-radius: var(--card-radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 14px;
+  overflow: visible;
+  flex: 0 0 320px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  will-change: transform;
+}
+
+/* overlap: negative margin for adjacent cards */
+.cards-group .card + .card {
+  margin-left: -96px;
+}
+
+/* stacking order */
+.cards-group .card {
+  z-index: 1;
+}
+.cards-group .card:nth-child(1) {
+  z-index: 1;
+}
+.cards-group .card:nth-child(2) {
+  z-index: 2;
+}
+.cards-group .card:nth-child(3) {
+  z-index: 3;
+}
+.cards-group .card:nth-child(4) {
+  z-index: 4;
+}
+.cards-group .card:nth-child(5) {
+  z-index: 5;
+}
+.cards-group .card:nth-child(6) {
+  z-index: 6;
+}
+
+/* Hover/focus: bring hovered card to front */
+.card:focus,
+.card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 22px 48px rgba(0, 0, 0, 0.34);
+  z-index: 999 !important;
+  outline: none;
+}
+
+/* genre text: outline set to 0.5px and fill/stroke corrected as requested
+   - fill should be pale (var(--accent))
+   - stroke should be the darker color (var(--text))
+*/
+.card .genre-text {
+  font-family: "Fjalla One", system-ui, sans-serif;
+  font-size: 44px;
+  color: var(--accent); /* fill color restored to pale green like reference */
+  letter-spacing: -0.03em;
+  -webkit-text-stroke: 0.5px var(--text); /* stroke is darker */
+  text-transform: uppercase;
+  text-align: center;
+  /* ensure strong contrast by also using text-shadow subtle darkening for readability */
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* badge top-right */
+.card .badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+.card.good .badge img {
+  filter: drop-shadow(0 4px 14px rgba(242, 255, 188, 0.6));
+}
+.card.bad .badge img {
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4));
+}
+
+/* Responsive adjustments: reduce overlap on small screens */
+@media (max-width: 1200px) {
+  :root {
+    --page-side-offset: 60px;
+  }
+  .cards-group .card + .card {
+    margin-left: -72px;
+  }
+  .card {
+    flex: 0 0 300px;
+    min-width: 240px;
+    height: 128px;
+  }
+  .card .genre-text {
+    font-size: 36px;
+    -webkit-text-stroke: 0.45px;
+  }
+  .status-column {
+    left: calc(var(--page-side-offset) - 4px);
+    top: calc(var(--page-top-offset) + 0px);
+  }
+}
+
+@media (max-width: 900px) {
+  :root {
+    --page-side-offset: 40px;
+  }
+  .cards-group .card + .card {
+    margin-left: -44px;
+  }
+  .card {
+    min-width: 220px;
+    height: 110px;
+    flex: 0 0 220px;
+  }
+  .card .genre-text {
+    font-size: 28px;
+    -webkit-text-stroke: 0.5px;
+  }
+  .status-column {
+    display: none;
+  }
+}
+
+/* ensure shadows aren't clipped by parent overflow */
+.results-wrap,
+.cards-column,
+.cards-group {
+  overflow: visible;
+}

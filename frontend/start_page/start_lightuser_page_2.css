@@ -1,0 +1,237 @@
+:root {
+  --color-bg: #ededed;
+  --color-dark: #151515;
+  --color-accent-soft: #f2ffbc;
+}
+
+/* 리셋 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  background-color: var(--color-bg);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  letter-spacing: -0.07em;
+  overflow: hidden;
+}
+
+/* 전체 페이지 래퍼 */
+.start-light-page-2 {
+  position: fixed;
+  inset: 0;
+  background-color: var(--color-bg);
+  overflow: hidden;
+}
+
+/* 배경 로고 */
+.bg-logo-icon {
+  position: absolute;
+  width: 55vw;
+  height: auto;
+  top: -10vh;
+  left: -10vw;
+  transform: rotate(26.78deg);
+  opacity: 0.5;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+/* 검정 오버레이 */
+.dark-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.25);
+  z-index: 2;
+}
+
+/* 실제 컨텐츠: 오버레이보다 위에 오도록 z-index 보장 */
+.light-2-content {
+  position: relative;
+  z-index: 3; /* 반드시 overlay보다 큼 */
+  width: 100%;
+  height: 100%;
+  padding: 120px 40px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* 가운데 정렬 영역 */
+.center-row {
+  width: 100%;
+  max-width: 960px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* side icon */
+.side-icon {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  cursor: pointer;
+  filter: drop-shadow(0 0 26.5px #f2ffbc);
+  pointer-events: auto;
+  z-index: 4;
+}
+
+/* mystery card */
+.mystery-card {
+  width: 320px;
+  aspect-ratio: 1/1;
+  background-color: #ededed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 21px rgba(0, 0, 0, 0.25);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* 물음표 */
+.mystery-mark {
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  font-size: 120px;
+  font-weight: 800;
+  color: #f2ffbc;
+  -webkit-text-stroke: 1px #000000;
+}
+
+/* 재생 아이콘 */
+.music-play-icon {
+  width: 30px;
+  height: auto;
+  margin-top: 80px;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 4;
+}
+
+/* 재생바 */
+.progress-area {
+  position: absolute;
+  left: 50%;
+  bottom: 80px;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 960px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 4;
+}
+
+.time-text {
+  font-size: 12px;
+  color: #3c3c3c;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 3px;
+  border-radius: 999px;
+  background-color: #d9d9d9;
+  overflow: hidden;
+}
+
+.progress-fill {
+  width: 0%;
+  height: 100%;
+  background-color: var(--color-accent-soft);
+}
+
+/* track info hidden by default, shown in result-mode */
+.track-info {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  text-align: center;
+  display: none;
+}
+
+.track-title {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.track-artist {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 400;
+  color: #000000;
+}
+
+/* genre bg text hidden initially */
+.genre-bg-text {
+  position: fixed;
+  left: 50%;
+  top: 72%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  font-size: min(26vw, 260px);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.07em;
+  white-space: nowrap;
+  color: #3c3c3c;
+  -webkit-text-stroke: 2px #f2ffbc;
+  text-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+  opacity: 0.2;
+  pointer-events: none;
+  display: none;
+}
+
+/* selection indicator hidden initially */
+.selection-indicator {
+  position: absolute;
+  left: 50%;
+  bottom: 80px;
+  transform: translateX(-50%);
+  z-index: 4;
+  display: none;
+}
+
+.selection-icon {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 26.5px #f2ffbc);
+}
+
+/* result-mode toggles */
+.result-mode .track-info,
+.result-mode .genre-bg-text,
+.result-mode .selection-indicator {
+  display: block;
+}
+
+.result-mode .music-play-icon,
+.result-mode .progress-area {
+  display: none;
+}
+
+.result-mode .side-icon {
+  opacity: 0;
+  pointer-events: none;
+}

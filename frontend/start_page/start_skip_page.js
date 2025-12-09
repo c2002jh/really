@@ -74,46 +74,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 4) 하단 skip 버튼 → 다음 단계로 이동 (저장 포함)
+  // 4) 하단 skip 버튼 → brain_file_page로 이동
   if (skipBtn) {
-    skipBtn.addEventListener("click", async () => {
-      await saveAndProceed([]);
+    skipBtn.addEventListener("click", () => {
+      window.location.href = "brain_file_page.html";
     });
   }
 
-  // 5) 오른쪽 화살표 아이콘 → 다음 단계로 이동 (저장 포함)
+  // 5) 오른쪽 화살표 아이콘 → brain_file_page로 이동
   if (rightIcon) {
-    rightIcon.addEventListener("click", async () => {
-      await saveAndProceed(selectedGenres);
+    rightIcon.addEventListener("click", () => {
+      window.location.href = "brain_file_page.html";
     });
-  }
-
-  async function saveAndProceed(dislikedGenres) {
-    const userId = localStorage.getItem('neurotune_userId') || 'anonymous';
-    const likedGenres = JSON.parse(localStorage.getItem('neurotune_likedGenres') || '[]');
-    
-    // Save disliked genres to localStorage
-    localStorage.setItem('neurotune_dislikedGenres', JSON.stringify(dislikedGenres));
-    
-    // Save combined to neurotune_genres for compatibility
-    localStorage.setItem('neurotune_genres', JSON.stringify(likedGenres));
-
-    try {
-      // Save both liked and disliked genres to backend
-      const response = await fetch('http://localhost:5000/api/preferences', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: userId,
-          genres: likedGenres,
-          dislikedGenres: dislikedGenres
-        })
-      });
-    } catch (error) {
-      console.error('Error saving genres:', error);
-    }
-
-    // Proceed to next step
-    window.location.href = "../frontend/onboarding/06-device-connection.html";
   }
 });

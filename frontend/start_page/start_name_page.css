@@ -1,0 +1,154 @@
+:root {
+  --color-bg: #ededed;
+  --color-dark: #151515;
+  --color-border: #c7c7c7;
+  --color-line: #3c3c3c;
+  --color-accent-soft: #f2ffbc;
+  --color-accent-strong: #dbff44;
+}
+
+/* 공통 리셋 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  background-color: var(--color-bg);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+/* 전체 페이지 래퍼 */
+.start-name-page {
+  position: fixed;
+  inset: 0;
+  background-color: var(--color-bg);
+  overflow: hidden;
+}
+
+/* -------------------------------- */
+/*         BACKGROUND ICON          */
+/* -------------------------------- */
+
+.bg-logo-icon {
+  position: absolute;
+  /* 1440x1024 기준 width 1069px ≒ 74.3% */
+  width: 55vw;
+  height: auto;
+
+  /* Figma 위치 x:-380, y:-217 → 비율로 변환 */
+  top: -10vh; /* -217 / 1024 ≒ -21.2% */
+  left: -10vw; /* -380 / 1440 ≒ -26.4% */
+
+  /* Figma -26.78° → CSS에서는 반대로 26.78deg */
+  transform: rotate(26.78deg);
+
+  opacity: 0.5;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+/* -------------------------------- */
+/*          CENTER CONTENT          */
+/* -------------------------------- */
+
+.start-name-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 타이틀 텍스트 */
+.start-title {
+  margin: 0 16px 21px;
+  color: var(--color-dark);
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: -0.07em; /* 자간 -7% 느낌 */
+  text-align: center;
+}
+
+.start-title .highlight {
+  font-weight: 700; /* '닉네임'만 Bold */
+}
+
+/* -------------------------------- */
+/*          NICKNAME INPUT          */
+/* -------------------------------- */
+
+.nickname-form {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.nickname-field {
+  position: relative;
+  width: 520px;
+  max-width: 70vw;
+
+  height: 46px;
+  padding: 0 96px 0 24px;
+
+  border-radius: 999px;
+  border: 1.5px solid var(--color-line);
+  background-color: var(--color-bg);
+}
+
+/* 텍스트 입력칸 (커서 깜빡이는 기본 input) */
+.nickname-input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+
+  background: transparent;
+  color: var(--color-dark);
+  font-size: 16px;
+}
+
+/* 오른쪽 GO 버튼 */
+.go-button {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  min-width: 60px;
+  height: 32px;
+  padding: 0 18px;
+
+  border: none;
+  border-radius: 999px;
+  background-color: var(--color-accent-strong);
+
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #727272;
+
+  cursor: pointer;
+}
+
+/* 버튼 눌렀을 때 살짝 눌리는 느낌만 */
+.go-button:active {
+  transform: translateY(-50%) scale(0.97);
+}

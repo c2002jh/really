@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NeuroTune</title>
+
+    <!-- Fjalla One (공통 폰트, 필요 시) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="start_lightuser_page.css" />
+  </head>
+  <body>
+    <main class="start-light-page">
+      <!-- 1. background icon (heavy 페이지와 동일) -->
+      <img
+        src="icon/neurotune_icon.png"
+        alt="NeuroTune background icon"
+        class="bg-logo-icon"
+      />
+
+      <section class="light-content">
+        <!-- 2. 샘플 음악을 들려드릴게요 -->
+        <h1 class="sample-title">
+          <span class="highlight">샘플 음악</span>을 들려드릴게요
+        </h1>
+
+        <!-- 3. GOOD / BAD 그룹 -->
+        <div class="good-bad-group">
+          <div class="good-bad-item">
+            <img src="icon/check_icon.png" alt="good icon" class="state-icon" />
+            <span class="state-text">GOOD</span>
+          </div>
+          <div class="good-bad-item">
+            <img src="icon/x_icon.png" alt="bad icon" class="state-icon" />
+            <span class="state-text">BAD</span>
+          </div>
+        </div>
+
+        <!-- 4. 헤드폰 아이콘 -->
+        <img
+          src="icon/headphones_icon.png"
+          alt="headphones icon"
+          class="headphones-icon"
+        />
+
+        <!-- 5. 장비 착용을 권장해요 -->
+        <p class="equipment-text">
+          <span class="bold">장비 착용</span>을 권장해요
+        </p>
+
+        <!-- 6. START 버튼 -->
+        <button class="start-button" type="button">START</button>
+      </section>
+    </main>
+
+    <script src="start_lightuser_page.js" defer></script>
+  </body>
+</html>

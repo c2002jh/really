@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NeuroTune</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="start_skip_page.css" />
+  </head>
+  <body>
+    <main class="start-skip-page">
+      <!-- 배경 아이콘 (start_heavyuser_page와 동일 설정 써도 됨) -->
+      <img
+        src="icon/neurotune_icon.png"
+        alt="NeuroTune background icon"
+        class="bg-logo-icon"
+      />
+
+      <!-- 왼쪽 상단 뒤로가기 아이콘 -->
+      <img src="icon/back_icon.png" alt="뒤로가기" class="back-icon" />
+
+      <section class="skip-content">
+        <!-- 1. OO님이 잘 듣지 않는 음악을 골라주세요 -->
+        <h1 class="skip-title">
+          <span id="nickname-placeholder">OO</span>님이 잘 듣지 않는 음악을
+          골라주세요
+        </h1>
+        <p class="skip-subtext">추천 음악에서 최대한 제외해드려요</p>
+
+        <!-- 장르 박스 6개 group -->
+        <section class="genre-section">
+          <div class="genre-scroll">
+            <button class="genre-card">K-POP</button>
+            <button class="genre-card">Indie</button>
+            <button class="genre-card">POP</button>
+            <button class="genre-card">Classic</button>
+            <button class="genre-card">EDM</button>
+            <button class="genre-card">Jazz</button>
+          </div>
+        </section>
+
+        <!-- 장르 박스 아래 front 아이콘 -->
+        <img
+          src="icon/right_double_icon.png"
+          alt="다음 단계로"
+          class="right-double-icon"
+        />
+
+        <!-- 하단 skip 박스 -->
+        <button class="page-indicator skip-btn">skip</button>
+      </section>
+    </main>
+
+    <script src="start_skip_page.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>NeuroTune — Results</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="start_lightuser_page_3.css" />
+  </head>
+  <body>
+    <main class="start-light-page-3">
+      <img src="icon/neurotune_icon.png" alt="" class="bg-logo-icon" />
+
+      <div class="dark-overlay" aria-hidden="true"></div>
+
+      <section class="results-wrap" aria-label="Result summary">
+        <div class="status-column" aria-hidden="true">
+          <div class="status-item good" title="Good">
+            <img src="icon/check2_icon.png" alt="good" />
+          </div>
+
+          <div class="spacer" aria-hidden="true"></div>
+
+          <div class="status-item bad" title="Bad">
+            <img src="icon/x_icon.png" alt="bad" />
+          </div>
+        </div>
+
+        <div class="cards-column" role="list">
+          <div
+            class="cards-group cards-good"
+            aria-label="Good group"
+            role="list"
+          ></div>
+          <div
+            class="cards-group cards-bad"
+            aria-label="Bad group"
+            role="list"
+          ></div>
+        </div>
+      </section>
+
+      <script src="start_lightuser_page_3.js" defer></script>
+    </main>
+  </body>
+</html>

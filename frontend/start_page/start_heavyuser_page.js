@@ -1,3 +1,12 @@
+const params = new URLSearchParams(window.location.search);
+const nickname = params.get("nickname");
+
+// 닉네임이 있으면 OO 자리에 삽입
+const nicknamePlaceholder = document.getElementById("nickname-placeholder");
+if (nickname && nicknamePlaceholder) {
+  nicknamePlaceholder.textContent = nickname;
+}
+
 const cards = document.querySelectorAll(".genre-card");
 let selectedGenres = [];
 let arrowShown = false;
@@ -69,9 +78,7 @@ cards.forEach((card) => {
   const rightIcon = document.querySelector(".right-double-icon");
   if (rightIcon) {
     rightIcon.addEventListener("click", () => {
-      // Save liked genres
-      localStorage.setItem('neurotune_likedGenres', JSON.stringify(selectedGenres));
-      window.location.href = "start_skip_page.html"; 
+      window.location.href = "start_skip_page.html"; // 실제 파일 이름에 맞게!
     });
   }
 });

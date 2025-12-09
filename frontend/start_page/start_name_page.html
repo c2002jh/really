@@ -29,11 +29,15 @@
           사용할 <span class="highlight">닉네임</span>을 정해주세요
         </h1>
 
-        <form class="nickname-form" id="nicknameForm">
+        <form
+          class="nickname-form"
+          action="start_heavyuser_page.html"
+          method="GET"
+        >
           <div class="nickname-field">
             <input
               type="text"
-              id="nicknameInput"
+              name="nickname"
               class="nickname-input"
               placeholder=""
               autocomplete="off"
@@ -43,19 +47,5 @@
         </form>
       </section>
     </main>
-    <script>
-      document.getElementById('nicknameForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const nickname = document.getElementById('nicknameInput').value.trim();
-        if (nickname) {
-          localStorage.setItem('neurotune_nickname', nickname);
-          // Also save to sessionStorage for immediate use in next pages if needed
-          sessionStorage.setItem('neurotuneNickname', nickname);
-          window.location.href = 'start_heavyuser_page.html';
-        } else {
-          alert('닉네임을 입력해주세요.');
-        }
-      });
-    </script>
   </body>
 </html>
