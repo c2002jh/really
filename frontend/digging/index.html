@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroTune - Song Digging</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=Pretendard:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/common.css">
+    <link rel="stylesheet" href="../eeg-evaluation/07-eeg-collection.css">
+    <link rel="stylesheet" href="digging.css">
+</head>
+<body>
+    <main class="page-wrapper">
+        <!-- Background icon -->
+        <img src="../../logo_page/icon/neurotune_icon.png" alt="NeuroTune background icon" class="bg-logo-icon" />
+
+        <!-- Step 1: Genre Selection -->
+        <section id="genreSection" class="evaluation-content active">
+            <h2 style="font-family: 'Fjalla One'; font-size: 2.5rem; margin-bottom: 1rem; color: var(--color-dark);">SELECT GENRE</h2>
+            <p style="margin-bottom: 2rem; color: var(--color-text-gray);">디깅할 장르를 선택해주세요.</p>
+            <div class="genre-grid" id="genreGrid">
+                <!-- Genres will be injected here -->
+            </div>
+            <button id="backToMainBtn" class="btn-text" style="margin-top: 2rem;">BACK TO MAIN</button>
+        </section>
+
+        <!-- Step 2: Digging Interface -->
+        <section id="diggingSection" class="evaluation-content hidden">
+            <!-- Timer as Progress -->
+            <div class="progress-bar">
+                <div class="progress-text">
+                    SESSION TIME
+                </div>
+                <div class="timer-display" id="diggingTimer" style="text-align: center; font-family: 'Fjalla One'; font-size: 2rem; color: var(--color-dark); margin-top: 10px;">
+                    00:00:00
+                </div>
+            </div>
+
+            <!-- Genre Label -->
+            <div class="genre-label" id="selectedGenreTitle">GENRE</div>
+
+            <!-- Player Area -->
+            <div class="song-info fade-in">
+                <div class="album-cover" id="spotifyEmbedContainer" style="background: #000; display: flex; align-items: center; justify-content: center;">
+                    <!-- Spotify Embed will go here -->
+                    <p style="color: white;">Loading Player...</p>
+                </div>
+                
+                <h2 class="song-title" id="statusTitle">Ready to Dig</h2>
+                <p class="artist-name" id="statusDesc">음악을 재생하고 Start 버튼을 눌러주세요</p>
+
+                <div class="controls-container" style="margin-top: 20px;">
+                    <button id="actionBtn" class="btn-control" style="padding: 12px 30px; border-radius: 30px; background: var(--color-dark); color: white; border: none; cursor: pointer; font-family: 'Fjalla One'; font-size: 1.2rem;">
+                        START DIGGING
+                    </button>
+                </div>
+            </div>
+
+            <!-- Upload Section (Hidden initially) -->
+            <div id="uploadArea" class="upload-section hidden">
+                <p class="upload-instruction">EEG 데이터를 업로드해주세요 (4개 파일)</p>
+                
+                <form id="uploadForm">
+                    <div class="upload-grid">
+                        <div class="upload-box" id="box-eeg1">
+                            <div class="upload-icon">📄</div>
+                            <div class="upload-label">EEG Ch1 (Fp1)</div>
+                            <input type="file" name="eeg1" accept=".txt" required>
+                        </div>
+                        <div class="upload-box" id="box-eeg2">
+                            <div class="upload-icon">📄</div>
+                            <div class="upload-label">EEG Ch2 (Fp2)</div>
+                            <input type="file" name="eeg2" accept=".txt" required>
+                        </div>
+                        <div class="upload-box" id="box-ecg">
+                            <div class="upload-icon">❤️</div>
+                            <div class="upload-label">ECG</div>
+                            <input type="file" name="ecg" accept=".txt" required>
+                        </div>
+                        <div class="upload-box" id="box-gsr">
+                            <div class="upload-icon">💧</div>
+                            <div class="upload-label">GSR</div>
+                            <input type="file" name="gsr" accept=".txt" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit" style="margin-top: 20px; width: 100%; padding: 15px; background: var(--color-accent); border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
+                        ANALYZE SESSION
+                    </button>
+                </form>
+            </div>
+            
+            <button id="backToGenreBtn" class="btn-text" style="margin-top: 20px;">BACK TO GENRE</button>
+        </section>
+    </main>
+
+    <script src="digging.js"></script>
+</body>
+</html>

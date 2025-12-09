@@ -1,367 +1,313 @@
-// Main Page JavaScript with AI Analysis and Enhanced Spotify
-
 const API_BASE_URL = 'http://localhost:5000/api';
-const GITHUB_COPILOT_API = 'https://api.githubcopilot.com/chat/completions'; // Placeholder
 
 document.addEventListener('DOMContentLoaded', () => {
-  const userId = localStorage.getItem('neurotune_userId') || 'anonymous';
-  const sidebar = document.getElementById('sidebar');
-  const sidebarTrigger = document.getElementById('sidebarTrigger');
+    console.log('Main Page Loaded');
+    
+    const userId = localStorage.getItem('neurotune_userId');
+    
+    // Redirect if not logged in
+    if (!userId) {
+        alert('로그인이 필요합니다.');
+        window.location.href = '../onboarding/02-login.html';
+        return;
+    }
 
-  // Set user name
-  document.getElementById('userName').textContent = userId;
-
-  // Load user's EEG data and preferences
-  loadUserData(userId);
-
-  // Load recommended albums
-  loadAlbums(userId);
-
-  // Set up sidebar toggle
-  let sidebarTimeout;
-
-  sidebarTrigger.addEventListener('mouseenter', () => {
-    clearTimeout(sidebarTimeout);
-    sidebar.classList.add('show');
-  });
-
-  sidebar.addEventListener('mouseleave', () => {
-    sidebarTimeout = setTimeout(() => {
-      sidebar.classList.remove('show');
-    }, 300);
-  });
-
-  sidebarTrigger.addEventListener('mouseleave', () => {
-    sidebarTimeout = setTimeout(() => {
-      sidebar.classList.remove('show');
-    }, 500);
-  });
-
-  // Set up AI Analysis button
-  document.getElementById('aiAnalysisBtn').addEventListener('click', showAIAnalysis);
-  document.getElementById('aiCloseBtn').addEventListener('click', () => {
-    document.getElementById('aiModal').style.display = 'none';
-  });
-
-  // Set up search functionality
-  document.getElementById('searchBtn').addEventListener('click', performSearch);
-  document.getElementById('searchInput').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') performSearch();
-  });
-
-  // Set up context buttons
-  document.querySelectorAll('.context-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      // Remove active from all buttons
-      document.querySelectorAll('.context-btn').forEach(b => b.classList.remove('active'));
-      
-      // Add active to clicked button
-      btn.classList.add('active');
-
-      // Get selected context
-      const context = btn.dataset.context;
-
-      // Load personalized playlist
-      loadPlaylist(userId, context);
+    // Logout Handler
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.removeItem('neurotune_userId');
+        window.location.href = '../onboarding/01-start.html';
     });
-  });
 
-  // Set up album slider auto-scroll
-  setupAlbumSlider();
+    // --- Data Loading ---
+    loadUserMood(userId);
+    loadContextPlaylist(userId);
+    loadAnalysisHistory(userId);
+    loadAnalysisStats(userId);
+    setupSidebar(userId);
+
+    // --- Modal Logic ---
+    const modal = document.getElementById('analysisModal');
+    const closeBtn = document.querySelector('.close-modal');
+    
+    closeBtn.onclick = () => modal.style.display = "none";
+    window.onclick = (event) => {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
 });
 
-async function loadUserData(userId) {
-  try {
-    // Load latest EEG analysis
-    const analysisResponse = await fetch(`${API_BASE_URL}/analysis/latest/${userId}`);
+/**
+ * Load User Mood Analysis
+ */
+async function loadUserMood(userId) {
+    const container = document.getElementById('moodContainer');
     
-    if (analysisResponse.ok) {
-      const analysisData = await analysisResponse.json();
-      const results = analysisData.data;
+    try {
+        const response = await fetch(`${API_BASE_URL}/music/mood-analysis?userId=${userId}`);
+        const data = await response.json();
 
-      // Update mood badges
-      document.getElementById('engagement').textContent = 
-        Math.round(results.engagement * 100) + '%';
-      document.getElementById('arousal').textContent = 
-        Math.round(results.arousal * 100) + '%';
-      document.getElementById('valence').textContent = 
-        Math.round(results.valence * 100) + '%';
-
-      // Update brain wave visualization
-      updateBrainWaveViz({
-        theta: results.thetaPower,
-        alpha: 0.85,
-        beta: 0.60,
-        gamma: 0.45
-      });
+        if (data.success && data.moodText) {
+            container.innerHTML = `<p>${data.moodText}</p>`;
+        } else {
+            container.innerHTML = '<div class="loading-placeholder">분석할 데이터가 충분하지 않습니다.</div>';
+        }
+    } catch (error) {
+        console.error('Error loading mood:', error);
+        container.innerHTML = '<div class="loading-placeholder">데이터를 불러오는 중 오류가 발생했습니다.</div>';
     }
-  } catch (error) {
-    console.error('Error loading user data:', error);
-  }
 }
 
-function updateBrainWaveViz(waves) {
-  const waveBars = document.querySelectorAll('.wave-bar');
-  waveBars[0].style.setProperty('--height', (waves.theta * 100) + '%');
-  waveBars[1].style.setProperty('--height', (waves.alpha * 100) + '%');
-  waveBars[2].style.setProperty('--height', (waves.beta * 100) + '%');
-  waveBars[3].style.setProperty('--height', (waves.gamma * 100) + '%');
+/**
+ * Load Analysis Stats
+ */
+async function loadAnalysisStats(userId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/analysis/count/${userId}`);
+        const data = await response.json();
+        if (data.success) {
+            document.getElementById('totalAnalyzedCount').textContent = data.count;
+        }
+    } catch (error) {
+        console.error('Error loading stats:', error);
+    }
 }
 
-async function loadAlbums(userId) {
-  try {
-    const genres = JSON.parse(localStorage.getItem('neurotune_genres') || '["pop"]');
+/**
+ * Setup Sidebar Logic
+ */
+function setupSidebar(userId) {
+    const resetBtn = document.getElementById('resetDataBtn');
     
-    // Fetch recommendations with album covers
-    const response = await fetch(
-      `${API_BASE_URL}/recommendations?context=general&userId=${userId}&limit=12`
-    );
-
-    if (response.ok) {
-      const data = await response.json();
-      const albumSlider = document.getElementById('albumSlider');
-      
-      // Clear placeholder albums
-      albumSlider.innerHTML = '';
-
-      // Add albums with clickable covers
-      data.data.forEach(track => {
-        const albumCard = document.createElement('div');
-        albumCard.className = 'album-card';
-        albumCard.innerHTML = `
-          <img src="${track.albumArt}" alt="${track.album}" />
-          <p class="album-title">${track.name}</p>
-          <p class="album-artist">${track.artists.join(', ')}</p>
-        `;
-        
-        // Make album clickable - open in Spotify
-        albumCard.addEventListener('click', () => {
-          if (track.spotifyUrl) {
-            window.open(track.spotifyUrl, '_blank');
-          }
-        });
-        
-        albumSlider.appendChild(albumCard);
-      });
-    }
-  } catch (error) {
-    console.error('Error loading albums:', error);
-  }
+    resetBtn.addEventListener('click', async () => {
+        if (confirm('정말로 모든 분석 데이터를 초기화하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/analysis/history/${userId}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('데이터가 초기화되었습니다.');
+                    location.reload();
+                } else {
+                    alert('초기화 실패: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error resetting data:', error);
+                alert('오류가 발생했습니다.');
+            }
+        }
+    });
 }
 
-async function performSearch() {
-  const query = document.getElementById('searchInput').value.trim();
-  const resultsDiv = document.getElementById('searchResults');
-  
-  if (!query) {
-    resultsDiv.style.display = 'none';
-    return;
-  }
+/**
+ * Load Analysis History (Recent Analysis List)
+ */
+async function loadAnalysisHistory(userId) {
+    const listContainer = document.getElementById('analysisList');
+    
+    try {
+        // Fetch analysis history (limit 10)
+        const response = await fetch(`${API_BASE_URL}/analysis/history/${userId}?limit=10`);
+        const data = await response.json();
 
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/search?query=${encodeURIComponent(query)}&limit=10`
-    );
+        if (data.success && data.data && data.data.length > 0) {
+            const items = data.data.map(result => {
+                const date = new Date(result.createdAt).toLocaleDateString();
+                
+                // Determine mood for icon
+                let icon = '😐';
+                if (result.focus > result.relax) icon = '🧠';
+                else if (result.relax > result.focus) icon = '🌿';
+                if (result.stress > 0.7) icon = '🔥';
 
-    if (response.ok) {
-      const data = await response.json();
-      resultsDiv.innerHTML = '';
-      
-      if (data.data && data.data.length > 0) {
-        data.data.forEach(track => {
-          const resultItem = document.createElement('div');
-          resultItem.className = 'search-result-item';
-          resultItem.innerHTML = `
-            <img src="${track.albumArt}" alt="${track.name}" />
-            <div class="search-result-info">
-              <div class="search-result-title">${track.name}</div>
-              <div class="search-result-artist">${track.artists.join(', ')}</div>
+                // Store data for modal
+                if (!window.analysisHistoryData) window.analysisHistoryData = [];
+                const index = window.analysisHistoryData.push(result) - 1;
+
+                const songTitle = result.songTitle || 'Unknown Song';
+                const artistName = result.artistName || 'Unknown Artist';
+                const focusScore = (result.focus * 100).toFixed(0);
+                const relaxScore = (result.relax * 100).toFixed(0);
+
+                return `
+                    <div class="analysis-item" onclick="openAnalysisModal(${index})">
+                        <div class="analysis-icon">${icon}</div>
+                        <div class="analysis-details">
+                            <h4>${songTitle} - ${artistName}</h4>
+                            <p>Focus: ${focusScore}% | Relax: ${relaxScore}%</p>
+                            <span style="font-size: 0.8rem; color: #888;">${date}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            listContainer.innerHTML = items; 
+            
+        } else {
+            listContainer.innerHTML = '<div class="loading-placeholder">분석 기록이 없습니다.<br>먼저 뇌파를 분석해보세요!</div>';
+        }
+    } catch (error) {
+        console.error('Error loading analysis:', error);
+        listContainer.innerHTML = '<div class="loading-placeholder">오류가 발생했습니다.</div>';
+    }
+}
+
+/**
+ * Open Analysis Modal
+ */
+window.openAnalysisModal = function(index) {
+    const data = window.analysisHistoryData[index];
+    if (!data) return;
+
+    const modal = document.getElementById('analysisModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalText = document.getElementById('modalText');
+    
+    modalTitle.textContent = `Analysis Result (${new Date(data.createdAt).toLocaleDateString()})`;
+    
+    // AI Interpretation or Raw Data Summary
+    if (data.aiInterpretation) {
+        modalText.innerHTML = data.aiInterpretation.replace(/\n/g, '<br>');
+    } else {
+        modalText.innerHTML = `
+            <div style="margin-bottom: 1rem;">
+                <strong>Focus Score:</strong> ${data.focus ? data.focus.toFixed(2) : '-'}<br>
+                <strong>Relax Score:</strong> ${data.relax ? data.relax.toFixed(2) : '-'}<br>
+                <strong>Stress Score:</strong> ${data.stress ? (data.stress || data.arousal).toFixed(2) : '-'}<br>
             </div>
-            <button class="play-btn" onclick="window.open('${track.spotifyUrl}', '_blank')">▶</button>
-          `;
-          resultsDiv.appendChild(resultItem);
-        });
-        resultsDiv.style.display = 'block';
-      } else {
-        resultsDiv.innerHTML = '<p style="padding: 16px; text-align: center;">검색 결과가 없습니다.</p>';
-        resultsDiv.style.display = 'block';
-      }
-    }
-  } catch (error) {
-    console.error('Error searching:', error);
-    resultsDiv.innerHTML = '<p style="padding: 16px; text-align: center; color: red;">검색 중 오류가 발생했습니다.</p>';
-    resultsDiv.style.display = 'block';
-  }
-}
-
-async function showAIAnalysis() {
-  const modal = document.getElementById('aiModal');
-  const resultDiv = document.getElementById('aiResult');
-  
-  modal.style.display = 'flex';
-  resultDiv.innerHTML = '<div class="loading"></div><p>AI가 당신의 음악 취향을 분석하고 있습니다...</p>';
-
-  try {
-    const userId = localStorage.getItem('neurotune_userId') || 'anonymous';
-    
-    // Fetch all user data for analysis
-    const [prefsResponse, analysisResponse, historyResponse] = await Promise.all([
-      fetch(`${API_BASE_URL}/preferences/${userId}`),
-      fetch(`${API_BASE_URL}/analysis/latest/${userId}`),
-      fetch(`${API_BASE_URL}/analysis/history/${userId}?limit=10`)
-    ]);
-
-    let analysisContext = '';
-    
-    if (prefsResponse.ok) {
-      const prefs = await prefsResponse.json();
-      analysisContext += `선호 장르: ${prefs.data.genres.join(', ')}\n`;
-    }
-    
-    if (analysisResponse.ok) {
-      const latest = await analysisResponse.json();
-      analysisContext += `최신 뇌파 분석:\n`;
-      analysisContext += `- 집중력: ${(latest.data.engagement * 100).toFixed(1)}%\n`;
-      analysisContext += `- 긴장도: ${(latest.data.arousal * 100).toFixed(1)}%\n`;
-      analysisContext += `- 감정: ${(latest.data.valence * 100).toFixed(1)}%\n`;
-    }
-
-    // Simulate AI analysis (In production, call GitHub Copilot API or GPT-4)
-    const aiAnalysis = await simulateAIAnalysis(analysisContext);
-    
-    resultDiv.innerHTML = `
-      <div class="ai-analysis-content">
-        <h4>📊 분석 결과</h4>
-        <p>${aiAnalysis}</p>
-        <div class="ai-recommendations">
-          <h4>💡 추천</h4>
-          <ul>
-            <li>현재 집중력이 높은 상태입니다. 공부나 작업에 적합한 시간이에요.</li>
-            <li>차분한 멜로디의 음악을 선호하시는 것으로 보입니다.</li>
-            <li>긍정적인 감정 상태를 유지하고 계시네요!</li>
-          </ul>
-        </div>
-      </div>
-    `;
-    
-  } catch (error) {
-    console.error('Error in AI analysis:', error);
-    resultDiv.innerHTML = `
-      <div class="ai-error">
-        <p>⚠️ AI 분석 중 오류가 발생했습니다.</p>
-        <p>잠시 후 다시 시도해주세요.</p>
-      </div>
-    `;
-  }
-}
-
-async function simulateAIAnalysis(context) {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 2000));
-  
-  // In production, this would call GitHub Copilot API or GPT-4.1
-  // For now, return a simulated analysis
-  return `당신의 음악 취향 분석 결과입니다. 
-  
-  수집된 EEG 데이터와 선호 장르를 분석한 결과, 당신은 **감성적이고 차분한 음악**을 선호하는 경향이 있습니다. 
-  
-  현재 뇌파 상태를 보면 집중력과 이완 상태가 균형잡혀 있어 창의적인 작업이나 독서에 최적의 상태입니다.
-  
-  당신의 음악 취향은 시간대에 따라 변화하는 특징을 보이며, 오전에는 에너지가 높은 곡을, 저녁에는 더 차분한 곡을 선호하는 패턴이 관찰됩니다.`;
-}
-
-async function loadPlaylist(userId, context) {
-  const playlistSection = document.getElementById('playlistSection');
-  const playlistContainer = document.getElementById('playlistContainer');
-
-  // Show loading
-  playlistContainer.innerHTML = '<div class="loading"></div>';
-  playlistSection.style.display = 'block';
-
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/recommendations?context=${context}&userId=${userId}&limit=20`
-    );
-
-    if (response.ok) {
-      const data = await response.json();
-      
-      // Clear loading
-      playlistContainer.innerHTML = '';
-
-      // Add tracks with enhanced UI
-      data.data.forEach((track, index) => {
-        const playlistItem = document.createElement('div');
-        playlistItem.className = 'playlist-item slide-up';
-        playlistItem.style.animationDelay = `${index * 0.05}s`;
-        
-        // Calculate match score based on EEG data if available
-        const matchScore = data.eegData 
-          ? Math.round(data.eegData.overallPreference * 100)
-          : Math.round(Math.random() * 30 + 70); // Random score between 70-100
-
-        playlistItem.innerHTML = `
-          <img src="${track.albumArt}" alt="${track.name}" />
-          <div class="playlist-item-info">
-            <h3 class="playlist-item-title">${track.name}</h3>
-            <p class="playlist-item-artist">${track.artists.join(', ')}</p>
-          </div>
-          <div class="playlist-item-score">${matchScore}% 매칭</div>
-          <button class="playlist-play-btn" onclick="window.open('${track.spotifyUrl}', '_blank')">▶</button>
+            <p>AI 상세 분석 결과가 없습니다.</p>
+            <button id="generateAiBtn" class="btn-secondary" style="margin-top:10px; padding:8px 16px; background:#24292e; color:white; border:none; border-radius:4px; cursor:pointer;">
+                🤖 AI 분석 생성하기
+            </button>
         `;
-
-        playlistContainer.appendChild(playlistItem);
-      });
+        
+        // Add event listener for the button
+        setTimeout(() => {
+            const btn = document.getElementById('generateAiBtn');
+            if (btn) {
+                btn.onclick = () => generateAIReport(data.userId);
+            }
+        }, 0);
     }
-  } catch (error) {
-    console.error('Error loading playlist:', error);
-    playlistContainer.innerHTML = '<p>플레이리스트를 불러올 수 없습니다.</p>';
-  }
+
+    modal.style.display = "block";
+
+    // Render Charts
+    renderModalCharts(data);
 }
 
-function setupAlbumSlider() {
-  const slider = document.getElementById('albumSlider');
-  let isDown = false;
-  let startX;
-  let scrollLeft;
-
-  slider.addEventListener('mousedown', (e) => {
-    isDown = true;
-    slider.style.cursor = 'grabbing';
-    startX = e.pageX - slider.offsetLeft;
-    scrollLeft = slider.scrollLeft;
-  });
-
-  slider.addEventListener('mouseleave', () => {
-    isDown = false;
-    slider.style.cursor = 'grab';
-  });
-
-  slider.addEventListener('mouseup', () => {
-    isDown = false;
-    slider.style.cursor = 'grab';
-  });
-
-  slider.addEventListener('mousemove', (e) => {
-    if (!isDown) return;
-    e.preventDefault();
-    const x = e.pageX - slider.offsetLeft;
-    const walk = (x - startX) * 2;
-    slider.scrollLeft = scrollLeft - walk;
-  });
-
-  // Auto-scroll effect
-  let scrollDirection = 1;
-  setInterval(() => {
-    if (!isDown) {
-      slider.scrollLeft += scrollDirection;
-      
-      // Reverse direction at edges
-      if (slider.scrollLeft >= slider.scrollWidth - slider.clientWidth) {
-        scrollDirection = -1;
-      } else if (slider.scrollLeft <= 0) {
-        scrollDirection = 1;
-      }
+async function generateAIReport(userId) {
+    const btn = document.getElementById('generateAiBtn');
+    if(btn) {
+        btn.disabled = true;
+        btn.textContent = "분석 중...";
     }
-  }, 50);
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/analyze/ai-interpretation`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId })
+        });
+        const result = await response.json();
+        if (result.success) {
+            alert("분석 완료! 페이지를 새로고침하면 결과가 표시됩니다.");
+            location.reload();
+        } else {
+            alert("분석 실패: " + result.error);
+            if(btn) {
+                btn.disabled = false;
+                btn.textContent = "다시 시도";
+            }
+        }
+    } catch (e) {
+        console.error(e);
+        alert("오류 발생");
+    }
+}
+
+function renderModalCharts(data) {
+    // Chart 1: Focus vs Relax
+    const ctx1 = document.getElementById('modalChart1').getContext('2d');
+    if (window.myModalChart1) window.myModalChart1.destroy();
+    
+    const focus = data.focus || 0;
+    const relax = data.relax || 0;
+    const stress = data.stress || data.arousal || 0;
+
+    window.myModalChart1 = new Chart(ctx1, {
+        type: 'doughnut',
+        data: {
+            labels: ['Focus', 'Relax', 'Stress'],
+            datasets: [{
+                data: [focus, relax, stress],
+                backgroundColor: ['#dbff44', '#a55eea', '#ff7675'],
+                borderWidth: 0
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    // Chart 2: Brain Waves (Mock or Real if available)
+    const ctx2 = document.getElementById('modalChart2').getContext('2d');
+    if (window.myModalChart2) window.myModalChart2.destroy();
+
+    // If we have raw band powers, use them. Otherwise mock.
+    // The backend saves thetaPower. Others might be missing in the simplified model.
+    // Let's use what we have or mock.
+    window.myModalChart2 = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: ['Theta', 'Alpha', 'Beta', 'Gamma'],
+            datasets: [{
+                label: 'Power',
+                data: [
+                    data.thetaPower || Math.random(), 
+                    (data.relax || 0.5), // Alpha correlates with relax
+                    (data.focus || 0.5), // Beta correlates with focus
+                    (data.excite || 0.2) // Gamma
+                ], 
+                backgroundColor: '#dbff44'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+}
+
+/**
+ * Load Context Playlist based on Last Song Analysis
+ */
+async function loadContextPlaylist(userId) {
+    const container = document.getElementById('studyPlaylist');
+    const contextText = document.getElementById('playlistContextText');
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/music/context-playlist?userId=${userId}`);
+        const data = await response.json();
+
+        if (data.success && data.data && data.data.length > 0) {
+            contextText.textContent = `현재 기분에 맞는 추천 곡`;
+            
+            container.innerHTML = data.data.map(song => `
+                <div class="playlist-item" onclick="window.open('${song.spotifyUrl}', '_blank')">
+                    <img src="${song.image || '../logo_page/icon/neurotune_icon.png'}" class="playlist-cover">
+                    <div class="playlist-info">
+                        <h4>${song.name}</h4>
+                        <p>${song.artist}</p>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = '<div class="loading-placeholder">추천 곡을 찾을 수 없습니다.</div>';
+        }
+    } catch (error) {
+        console.error('Error loading context playlist:', error);
+        container.innerHTML = '<div class="loading-placeholder">데이터를 불러오는 중 오류가 발생했습니다.</div>';
+    }
 }

@@ -98,7 +98,15 @@ function updateUI() {
   // Reset upload boxes
   document.querySelectorAll('.upload-box').forEach(box => {
     box.classList.remove('uploaded');
-    box.querySelector('.upload-status').textContent = '';
+    const statusSpan = box.querySelector('.upload-status');
+    if (statusSpan) statusSpan.textContent = '';
+  });
+
+  // Reset file inputs
+  const fileInputs = ['rawdata', 'fp1', 'fp2', 'biomarkers'];
+  fileInputs.forEach(id => {
+    const input = document.getElementById(`file-${id}`);
+    if (input) input.value = '';
   });
 
   uploadedFiles = {};
@@ -177,11 +185,12 @@ async function handleNextSong() {
         window.location.href = '../main-page/index.html';
       }
     } else {
-      throw new Error('Analysis failed');
+      const errorText = await response.text();
+      throw new Error(`Analysis failed: ${response.status} ${errorText}`);
     }
   } catch (error) {
     console.error('Error analyzing EEG data:', error);
-    alert('EEG 데이터 분석 중 오류가 발생했습니다. 다시 시도해주세요.');
+    alert('EEG 데이터 분석 중 오류가 발생했습니다: ' + error.message);
     document.getElementById('loadingOverlay').style.display = 'none';
   }
 }

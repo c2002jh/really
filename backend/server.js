@@ -13,10 +13,7 @@ const app = express();
  */
 
 // Enable CORS for all origins (configure as needed for production)
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',
-  credentials: true,
-}));
+app.use(cors());
 
 // Body parser middleware
 app.use(express.json());
@@ -27,6 +24,8 @@ app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   next();
 });
+
+console.log('Server is starting/restarting...');
 
 /**
  * Database Connection

@@ -1,0 +1,11 @@
+{
+  "verbose": true,
+  "ignore": [
+    "uploads/*",
+    "uploads/**",
+    "**/uploads/*",
+    "**/uploads/**",
+    "analysis/__pycache__/*",
+    "*.log"
+  ]
+}

@@ -23,10 +23,13 @@ class EEGService {
         return reject(new Error('All 4 file paths are required: eeg1, eeg2, ecg, gsr'));
       }
 
-      // Use configurable Python command from environment or default to 'python3'
-      const pythonCommand = process.env.PYTHON_COMMAND || 'python3';
+      // Use configurable Python command from environment or default based on platform
+      const isWindows = process.platform === 'win32';
+      const defaultPython = isWindows ? 'python' : 'python3';
+      const pythonCommand = process.env.PYTHON_COMMAND || defaultPython;
 
       // Spawn Python process with file paths as arguments
+      console.log(`Spawning Python process: ${pythonCommand} ${scriptPath}`);
       const pythonProcess = spawn(pythonCommand, [
         scriptPath,
         filePaths.eeg1,
@@ -40,16 +43,21 @@ class EEGService {
 
       // Collect stdout data
       pythonProcess.stdout.on('data', (data) => {
-        outputData += data.toString();
+        const str = data.toString();
+        console.log('Python stdout:', str);
+        outputData += str;
       });
 
       // Collect stderr data
       pythonProcess.stderr.on('data', (data) => {
-        errorData += data.toString();
+        const str = data.toString();
+        console.error('Python stderr:', str);
+        errorData += str;
       });
 
       // Handle process completion
       pythonProcess.on('close', (code) => {
+        console.log(`Python process exited with code ${code}`);
         if (code !== 0) {
           console.error(`Python script exited with code ${code}`);
           console.error('Error output:', errorData);
@@ -57,12 +65,28 @@ class EEGService {
         }
 
         try {
+          console.log('Raw Python output:', outputData);
           // Parse JSON output from Python script
-          const result = JSON.parse(outputData.trim());
+          // Find the last line that looks like JSON
+          const lines = outputData.trim().split('\n');
+          let jsonStr = '';
+          for (let i = lines.length - 1; i >= 0; i--) {
+            if (lines[i].trim().startsWith('{') && lines[i].trim().endsWith('}')) {
+                jsonStr = lines[i].trim();
+                break;
+            }
+          }
+          
+          if (!jsonStr) {
+             // Fallback to trying to parse the whole thing if no single line JSON found
+             jsonStr = outputData.trim();
+          }
+
+          const result = JSON.parse(jsonStr);
           resolve(result);
         } catch (error) {
           console.error('Failed to parse Python output:', outputData);
-          reject(new Error('Failed to parse EEG analysis results'));
+          reject(new Error('Failed to parse EEG analysis results: ' + error.message));
         }
       });
 

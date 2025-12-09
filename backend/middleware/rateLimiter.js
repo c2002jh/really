@@ -25,7 +25,7 @@ const generalLimiter = rateLimit({
  */
 const uploadLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 5, // Limit each IP to 5 upload requests per hour
+  max: 100, // Limit each IP to 100 upload requests per hour
   message: {
     success: false,
     error: 'Too many file uploads from this IP, please try again later.',

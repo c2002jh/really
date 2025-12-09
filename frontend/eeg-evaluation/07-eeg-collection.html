@@ -38,6 +38,17 @@
         <!-- Genre label -->
         <div class="genre-label" id="genreLabel">K-POP</div>
 
+        <!-- Year Selection -->
+        <div class="year-selection-container" style="margin-bottom: 20px; text-align: center;">
+            <label for="yearSelect" style="color: white; margin-right: 10px;">연도 선택:</label>
+            <select id="yearSelect" class="year-select" style="padding: 5px 10px; border-radius: 5px; background: rgba(255,255,255,0.2); color: white; border: 1px solid white;">
+                <option value="2020-2025" style="color: black;">2020년대</option>
+                <option value="2010-2019" style="color: black;">2010년대</option>
+                <option value="2000-2009" style="color: black;">2000년대</option>
+                <option value="1990-1999" style="color: black;">1990년대</option>
+            </select>
+        </div>
+
         <!-- Song info -->
         <div class="song-info fade-in">
           <div class="album-cover">
@@ -46,11 +57,46 @@
 
           <h2 class="song-title" id="songTitle">곡 제목</h2>
           <p class="artist-name" id="artistName">아티스트</p>
+          
+          <!-- Play/Pause and Like/Dislike Controls -->
+          <div class="controls-container" style="margin-top: 15px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+            <div class="playback-controls">
+                <button id="playPauseBtn" class="btn-control" style="padding: 8px 20px; border-radius: 20px; background: #1DB954; color: white; border: none; cursor: pointer; margin-right: 10px;">
+                    ▶ 재생
+                </button>
+                <button id="stopBtn" class="btn-control" style="padding: 8px 20px; border-radius: 20px; background: #e74c3c; color: white; border: none; cursor: pointer;">
+                    ⏹ 정지
+                </button>
+                <audio id="audioPreview" style="display: none;"></audio>
+            </div>
+            
+            <div class="preference-controls" style="display: flex; gap: 15px;">
+                <button id="likeBtn" class="btn-pref" data-value="like" style="padding: 8px 16px; border-radius: 20px; background: rgba(255,255,255,0.2); color: white; border: 1px solid white; cursor: pointer;">
+                    👍 좋음
+                </button>
+                <button id="dislikeBtn" class="btn-pref" data-value="dislike" style="padding: 8px 16px; border-radius: 20px; background: rgba(255,255,255,0.2); color: white; border: 1px solid white; cursor: pointer;">
+                    👎 싫음
+                </button>
+            </div>
+          </div>
+
+          <button id="rerollBtn" class="btn-reroll" style="margin-top: 15px; padding: 8px 16px; border-radius: 20px; background: rgba(255,255,255,0.2); color: white; border: 1px solid white; cursor: pointer;">
+            🔄 다른 노래 추천받기
+          </button>
         </div>
 
         <!-- File upload area -->
         <div class="upload-section">
           <p class="upload-instruction">EEG 데이터를 업로드해주세요 (4개 파일)</p>
+          
+          <!-- Folder Upload Option -->
+          <div class="folder-upload-container" style="text-align: center; margin-bottom: 20px;">
+            <input type="file" id="folder-input" webkitdirectory directory multiple style="display: none;" />
+            <button id="folderUploadBtn" class="btn-secondary" style="padding: 10px 20px; border-radius: 8px; cursor: pointer;">
+              📂 폴더 통째로 업로드하기
+            </button>
+            <p style="font-size: 12px; color: #aaa; margin-top: 5px;">(Rawdata.txt, Fp1_FFT.txt, Fp2_FFT.txt, Biomarkers.txt 파일이 포함된 폴더)</p>
+          </div>
 
           <div class="upload-grid">
             <div class="upload-box" data-file="rawdata">
@@ -92,9 +138,17 @@
         </div>
 
         <!-- Next song button -->
-        <button class="btn next-song-btn" id="nextSongBtn" disabled>
-          다음 곡
-        </button>
+        <div style="text-align: center; margin-top: 20px;">
+            <button class="btn next-song-btn" id="nextSongBtn" disabled>
+            다음 곡
+            </button>
+            <div style="margin-top: 10px;">
+                <label style="font-size: 12px; color: #666; cursor: pointer;">
+                    <input type="checkbox" id="useAiAnalysis" onchange="toggleAiToken()"> 
+                    AI 심층 분석 (GitHub Token 필요)
+                </label>
+            </div>
+        </div>
 
         <!-- Loading overlay -->
         <div class="loading-overlay" id="loadingOverlay" style="display: none">
@@ -106,6 +160,11 @@
 
     <script>
       const API_BASE_URL = 'http://localhost:5000/api';
+
+      // [DEBUG] 페이지 새로고침 감지 (Live Server가 파일 변경으로 인해 페이지를 새로고침하는지 확인)
+      window.addEventListener('beforeunload', (e) => {
+          console.warn('⚠️ 페이지가 새로고침/종료되고 있습니다! 진행 중인 요청이 취소될 수 있습니다.');
+      });
 
       let currentSongIndex = 0;
       let songs = [];
@@ -127,149 +186,192 @@
 
         // Set up next button
         document.getElementById('nextSongBtn').addEventListener('click', handleNextSong);
+        
+        // Set up Reroll button
+        document.getElementById('rerollBtn').addEventListener('click', fetchRandomSong);
+        
+        // Play/Pause logic is now handled inside displaySong to support both modes
+        
+        // Set up Like/Dislike
+        document.querySelectorAll('.btn-pref').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const value = e.target.dataset.value;
+                currentLikeStatus = value;
+                
+                // Update UI
+                document.querySelectorAll('.btn-pref').forEach(b => {
+                    b.style.background = 'rgba(255,255,255,0.2)';
+                });
+                e.target.style.background = value === 'like' ? '#1DB954' : '#E91E63';
+            });
+        });
       });
 
       async function loadSongsForEvaluation(genres) {
-        try {
-          // Fetch 3 songs per liked genre from Spotify
-          for (const genre of genres) {
-            try {
-              // Try to get recommendations from Spotify for this genre
-              const response = await fetch(
-                `${API_BASE_URL}/music/search?q=genre:${genre}&type=track&limit=3`
-              );
-
-              if (response.ok) {
-                const data = await response.json();
-                if (data.data && data.data.length > 0) {
-                  const genreSongs = data.data.slice(0, 3).map(track => ({
-                    id: track.id || `${genre}-${Math.random()}`,
-                    title: track.name || track.title,
-                    artist: Array.isArray(track.artists) ? track.artists.join(', ') : track.artist || '아티스트',
-                    albumCover: track.albumArt || track.albumCover || 'https://via.placeholder.com/300',
+        songs = [];
+        genres.forEach(genre => {
+            // 3 songs per genre
+            for (let i = 0; i < 3; i++) {
+                songs.push({
                     genre: genre,
-                    spotifyUrl: track.spotifyUrl || track.external_urls?.spotify || ''
-                  }));
-                  songs.push(...genreSongs);
-                }
-              }
-            } catch (error) {
-              console.warn(`Could not fetch songs for ${genre}, using placeholders`);
-            }
-          }
-
-          // If no songs loaded from API, use placeholder data
-          if (songs.length === 0) {
-            genres.forEach(genre => {
-              for (let i = 1; i <= 3; i++) {
-                songs.push({
-                  id: `${genre}-song-${i}`,
-                  title: `${genre.toUpperCase()} 추천곡 ${i}`,
-                  artist: '아티스트',
-                  albumCover: 'https://via.placeholder.com/300?text=' + genre,
-                  genre: genre,
-                  spotifyUrl: ''
+                    title: 'Loading...',
+                    artist: 'Loading...',
+                    albumCover: 'https://via.placeholder.com/300',
+                    id: null
                 });
-              }
-            });
-          }
-
-          document.getElementById('totalSongs').textContent = songs.length;
-          console.log(`Loaded ${songs.length} songs for evaluation`);
-        } catch (error) {
-          console.error('Error loading songs:', error);
-          // Use placeholder data
-          genres.forEach(genre => {
-            for (let i = 1; i <= 3; i++) {
-              songs.push({
-                id: `${genre}-song-${i}`,
-                title: `${genre.toUpperCase()} 추천곡 ${i}`,
-                artist: '아티스트',
-                albumCover: 'https://via.placeholder.com/300?text=' + genre,
-                genre: genre,
-                spotifyUrl: ''
-              });
             }
-          });
-          document.getElementById('totalSongs').textContent = songs.length;
-        }
-      }/recommendations?context=general&limit=3`
-            );
-
-            if (response.ok) {
-              const data = await response.json();
-              const genreSongs = data.data.slice(0, 3).map(track => ({
-                id: track.id,
-                title: track.name,
-                artist: track.artists.join(', '),
-                albumCover: track.albumArt,
-                genre: genre,
-                spotifyUrl: track.spotifyUrl
-              }));
-              songs.push(...genreSongs);
-            }
-          }
-
-          // If no songs loaded, use placeholder data
-          if (songs.length === 0) {
-            genres.forEach(genre => {
-              for (let i = 1; i <= 3; i++) {
-                songs.push({
-                  id: `${genre}-song-${i}`,
-                  title: `${genre} 곡 ${i}`,
-                  artist: '아티스트',
-                  albumCover: 'https://via.placeholder.com/300',
-                  genre: genre,
-                  spotifyUrl: ''
-                });
-              }
-            });
-          }
-
-          document.getElementById('totalSongs').textContent = songs.length;
-        } catch (error) {
-          console.error('Error loading songs:', error);
-          // Use placeholder data
-          genres.forEach(genre => {
-            for (let i = 1; i <= 3; i++) {
-              songs.push({
-                id: `${genre}-song-${i}`,
-                title: `${genre} 곡 ${i}`,
-                artist: '아티스트',
-                albumCover: 'https://via.placeholder.com/300',
-                genre: genre,
-                spotifyUrl: ''
-              });
-            }
-          });
-          document.getElementById('totalSongs').textContent = songs.length;
-        }
+        });
+        document.getElementById('totalSongs').textContent = songs.length;
       }
 
-      function updateUI() {
-        const song = songs[currentSongIndex];
-        
+      async function fetchRandomSong() {
+          const currentSong = songs[currentSongIndex];
+          // Ensure genre and year have valid values
+          const genre = currentSong.genre || 'pop';
+          const yearSelect = document.getElementById('yearSelect');
+          const yearRange = yearSelect ? yearSelect.value : '2020-2025';
+          
+          console.log(`Fetching song for Genre: ${genre}, Year: ${yearRange}`);
+
+          // Show loading state
+          document.getElementById('songTitle').textContent = '노래를 찾는 중...';
+          document.getElementById('artistName').textContent = '잠시만 기다려주세요';
+          document.getElementById('albumCover').style.opacity = '0.5';
+          
+          try {
+              const response = await fetch(`${API_BASE_URL}/music/random-track?genre=${encodeURIComponent(genre)}&year=${yearRange}`);
+              if (response.ok) {
+                  const result = await response.json();
+                  const track = result.data;
+                  
+                  currentSong.id = track.id;
+                  currentSong.title = track.name;
+                  currentSong.artist = track.artists[0].name;
+                  currentSong.albumCover = track.album.images[0].url;
+                  currentSong.previewUrl = track.preview_url;
+                  currentSong.spotifyUri = track.uri; // Store Spotify URI
+                  
+                  displaySong(currentSong);
+              } else {
+                  console.error('Failed to fetch song');
+                  document.getElementById('songTitle').textContent = '노래를 찾을 수 없습니다';
+                  document.getElementById('artistName').textContent = '다시 시도해주세요';
+              }
+          } catch (error) {
+              console.error('Error:', error);
+              document.getElementById('songTitle').textContent = '오류가 발생했습니다';
+          } finally {
+              document.getElementById('albumCover').style.opacity = '1';
+          }
+      }
+
+      function displaySong(song) {
+          document.getElementById('songTitle').textContent = song.title;
+          document.getElementById('artistName').textContent = song.artist;
+          document.getElementById('albumCover').src = song.albumCover;
+          
+          // Reset controls
+          const audio = document.getElementById('audioPreview');
+          const playBtn = document.getElementById('playPauseBtn');
+          const stopBtn = document.getElementById('stopBtn');
+          
+          audio.pause();
+          audio.currentTime = 0;
+          
+          // Remove old event listeners by cloning
+          const newPlayBtn = playBtn.cloneNode(true);
+          playBtn.parentNode.replaceChild(newPlayBtn, playBtn);
+          
+          const newStopBtn = stopBtn.cloneNode(true);
+          stopBtn.parentNode.replaceChild(newStopBtn, stopBtn);
+          
+          if (song.previewUrl) {
+              // Preview mode
+              newPlayBtn.textContent = '▶ 재생';
+              newPlayBtn.disabled = false;
+              newPlayBtn.style.opacity = '1';
+              newPlayBtn.style.background = '#1DB954';
+              newStopBtn.style.display = 'inline-block';
+              
+              audio.src = song.previewUrl;
+              
+              newPlayBtn.addEventListener('click', () => {
+                  if (audio.paused) {
+                      audio.play();
+                      newPlayBtn.textContent = '⏸ 일시정지';
+                  } else {
+                      audio.pause();
+                      newPlayBtn.textContent = '▶ 재생';
+                  }
+              });
+              
+              newStopBtn.addEventListener('click', () => {
+                  audio.pause();
+                  audio.currentTime = 0;
+                  newPlayBtn.textContent = '▶ 재생';
+              });
+              
+              audio.onended = () => {
+                  newPlayBtn.textContent = '▶ 재생';
+              };
+          } else {
+              // Spotify App mode
+              newPlayBtn.textContent = 'Spotify 앱에서 재생';
+              newPlayBtn.disabled = false;
+              newPlayBtn.style.opacity = '1';
+              newPlayBtn.style.background = '#191414'; // Spotify Black
+              newStopBtn.style.display = 'none'; // Cannot stop external app
+              
+              newPlayBtn.addEventListener('click', () => {
+                  if (song.spotifyUri) {
+                      window.location.href = song.spotifyUri;
+                  } else {
+                      alert('Spotify 연결 정보를 찾을 수 없습니다.');
+                  }
+              });
+          }
+          
+          // Reset like/dislike buttons
+          document.querySelectorAll('.btn-pref').forEach(btn => {
+              btn.style.background = 'rgba(255,255,255,0.2)';
+          });
+          currentLikeStatus = 'none';
+      }
+
+      let currentLikeStatus = 'none';
+
+      async function updateUI() {
+        const currentSong = songs[currentSongIndex];
         document.getElementById('currentSong').textContent = currentSongIndex + 1;
-        document.getElementById('genreLabel').textContent = song.genre.toUpperCase();
-        document.getElementById('songTitle').textContent = song.title;
-        document.getElementById('artistName').textContent = song.artist;
-        document.getElementById('albumCover').src = song.albumCover;
+        
+        const progressPercent = ((currentSongIndex) / songs.length) * 100;
+        document.getElementById('progressFill').style.width = `${progressPercent}%`;
 
-        // Update progress bar
-        const progress = ((currentSongIndex + 1) / songs.length) * 100;
-        document.getElementById('progressFill').style.width = `${progress}%`;
-
-        // Reset upload boxes
-        document.querySelectorAll('.upload-box').forEach(box => {
-          box.classList.remove('uploaded');
-          box.querySelector('.upload-status').textContent = '';
+        document.getElementById('genreLabel').textContent = currentSong.genre.toUpperCase();
+        
+        // If the song hasn't been fetched yet, fetch it
+        if (!currentSong.id) {
+            await fetchRandomSong();
+        } else {
+            displaySong(currentSong);
+        }
+        
+        // Reset file inputs
+        document.querySelectorAll('.upload-box input[type="file"]').forEach(input => {
+          input.value = '';
+          const label = input.nextElementSibling;
+          if (label) {
+              const status = label.querySelector('.upload-status');
+              if (status) status.textContent = '';
+              label.classList.remove('uploaded');
+          }
         });
-
         uploadedFiles = {};
         updateNextButton();
       }
 
       function setupFileUploads() {
+        // Individual file inputs
         const fileInputs = ['rawdata', 'fp1', 'fp2', 'biomarkers'];
 
         fileInputs.forEach(fileType => {
@@ -286,6 +388,44 @@
             }
           });
         });
+
+        // Folder upload
+        const folderBtn = document.getElementById('folderUploadBtn');
+        const folderInput = document.getElementById('folder-input');
+
+        folderBtn.addEventListener('click', () => {
+            folderInput.click();
+        });
+
+        folderInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            let matchCount = 0;
+
+            files.forEach(file => {
+                const name = file.name.toLowerCase();
+                let type = null;
+
+                if (name === 'rawdata.txt') type = 'rawdata';
+                else if (name === 'fp1_fft.txt') type = 'fp1';
+                else if (name === 'fp2_fft.txt') type = 'fp2';
+                else if (name === 'biomarkers.txt') type = 'biomarkers';
+
+                if (type) {
+                    uploadedFiles[type] = file;
+                    const box = document.querySelector(`.upload-box[data-file="${type}"]`);
+                    box.classList.add('uploaded');
+                    box.querySelector('.upload-status').textContent = file.name;
+                    matchCount++;
+                }
+            });
+
+            if (matchCount > 0) {
+                alert(`${matchCount}개의 파일이 자동으로 인식되었습니다.`);
+            } else {
+                alert('지정된 파일(Rawdata.txt, Fp1_FFT.txt, Fp2_FFT.txt, Biomarkers.txt)을 찾을 수 없습니다.');
+            }
+            updateNextButton();
+        });
       }
 
       function updateNextButton() {
@@ -296,14 +436,35 @@
         document.getElementById('nextSongBtn').disabled = !allFilesUploaded;
       }
 
+      function toggleAiToken() {
+          const checkbox = document.getElementById('useAiAnalysis');
+          if (checkbox.checked) {
+              const token = prompt('GitHub Personal Access Token을 입력해주세요:\n(AI 모델 사용을 위해 필요합니다)');
+              if (token) {
+                  localStorage.setItem('neurotune_githubToken', token);
+              } else {
+                  checkbox.checked = false;
+              }
+          } else {
+              localStorage.removeItem('neurotune_githubToken');
+          }
+      }
+
       async function handleNextSong() {
+        console.log('handleNextSong started');
         const userId = localStorage.getItem('neurotune_userId') || 'anonymous';
         const currentSong = songs[currentSongIndex];
+
+        if (!currentSong) {
+            alert('곡 정보를 찾을 수 없습니다.');
+            return;
+        }
 
         // Show loading overlay
         document.getElementById('loadingOverlay').style.display = 'flex';
 
         try {
+          console.log('Preparing form data...');
           // Prepare form data
           const formData = new FormData();
           formData.append('eeg1', uploadedFiles['rawdata']);
@@ -311,17 +472,45 @@
           formData.append('ecg', uploadedFiles['fp2']);
           formData.append('gsr', uploadedFiles['biomarkers']);
           formData.append('userId', userId);
+          // Add song metadata
+          formData.append('songTitle', currentSong.title || 'Unknown');
+          formData.append('artistName', currentSong.artist || 'Unknown');
+          formData.append('likeStatus', currentLikeStatus || 'none');
 
+          // Check for GitHub Token (Optional AI Analysis)
+          const githubToken = localStorage.getItem('neurotune_githubToken');
+          if (githubToken) {
+              formData.append('githubToken', githubToken);
+          }
+
+          console.log('Sending request to:', `${API_BASE_URL}/analyze`);
           // Send to backend for analysis
           const response = await fetch(`${API_BASE_URL}/analyze`, {
             method: 'POST',
             body: formData
           });
 
+          console.log('Response received. Status:', response.status);
+
           if (response.ok) {
-            const result = await response.json();
+            const text = await response.text();
+            console.log('Raw response text:', text);
             
+            let result;
+            try {
+                result = JSON.parse(text);
+            } catch (e) {
+                throw new Error(`JSON Parsing Error: ${e.message}. Response: ${text.substring(0, 100)}...`);
+            }
+
+            console.log('Parsed result:', result);
+            
+            if (!result.data || !result.data.results) {
+                throw new Error('Invalid analysis result format: data or results missing');
+            }
+
             // Store evaluation data
+            console.log('Storing evaluation data...');
             evaluationData.push({
               songId: currentSong.id,
               genre: currentSong.genre,
@@ -330,22 +519,31 @@
 
             // Move to next song or finish
             currentSongIndex++;
+            console.log('Moving to next song. Index:', currentSongIndex);
 
             if (currentSongIndex < songs.length) {
               // Hide loading and show next song
               document.getElementById('loadingOverlay').style.display = 'none';
-              updateUI();
+              console.log('Calling updateUI...');
+              await updateUI(); // Added await to catch errors in updateUI
             } else {
               // All songs evaluated, go to main page
+              console.log('All songs evaluated. Redirecting...');
               localStorage.setItem('neurotune_evaluationComplete', 'true');
               window.location.href = '../main-page/08-main.html';
             }
           } else {
-            throw new Error('Analysis failed');
+            const errorText = await response.text();
+            throw new Error(`Analysis failed: ${response.status} ${errorText}`);
           }
         } catch (error) {
           console.error('Error analyzing EEG data:', error);
-          alert('EEG 데이터 분석 중 오류가 발생했습니다. 다시 시도해주세요.');
+          console.error('Error details:', {
+              message: error.message,
+              name: error.name,
+              stack: error.stack
+          });
+          alert(`오류 발생!\n\n메시지: ${error.message}\n\n(콘솔(F12)을 확인하여 상세 로그를 캡처해주세요)`);
           document.getElementById('loadingOverlay').style.display = 'none';
         }
       }

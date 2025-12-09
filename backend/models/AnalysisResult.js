@@ -7,6 +7,23 @@ const analysisResultSchema = new mongoose.Schema(
       required: false,
       default: 'anonymous',
     },
+    songTitle: {
+      type: String,
+      required: false,
+    },
+    artistName: {
+      type: String,
+      required: false,
+    },
+    likeStatus: {
+      type: String,
+      enum: ['like', 'dislike', 'none'],
+      default: 'none',
+    },
+    aiInterpretation: {
+      type: String,
+      required: false,
+    },
     filePaths: {
       eeg1: { type: String, required: true },
       eeg2: { type: String, required: true },
@@ -43,6 +60,10 @@ const analysisResultSchema = new mongoose.Schema(
       min: 0,
       max: 1,
     },
+    focus: { type: Number },
+    relax: { type: Number },
+    excite: { type: Number },
+    preference: { type: Number },
     overallPreference: {
       type: Number,
       required: true,

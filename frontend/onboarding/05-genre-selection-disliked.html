@@ -433,18 +433,6 @@
         }
       });
 
-          if (response.ok) {
-            localStorage.setItem('neurotune_genres', JSON.stringify(selectedGenres));
-            window.location.href = '06-device-connection.html';
-          } else {
-            alert('장르 저장 중 오류가 발생했습니다.');
-          }
-        } catch (error) {
-          console.error('Error saving genres:', error);
-          alert('장르 저장 중 오류가 발생했습니다.');
-        }
-      });
-
       // Load genres on page load
       loadGenres();
     </script>

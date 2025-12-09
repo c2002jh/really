@@ -44,6 +44,10 @@ router.get('/auth/genre-cover/:genre', readLimiter, authController.getGenreCover
 // Verify Spotify connection
 router.get('/auth/verify', readLimiter, authController.verifyConnection);
 
+// Spotify User Login
+router.get('/auth/spotify/login', generalLimiter, authController.loginSpotify);
+router.get('/auth/spotify/callback', generalLimiter, authController.callbackSpotify);
+
 /**
  * User Preferences Routes
  */
@@ -67,6 +71,18 @@ router.get('/search', generalLimiter, musicController.searchTracks);
 // Get audio features for a track
 router.get('/audio-features/:trackId', generalLimiter, musicController.getAudioFeatures);
 
+// Get random track by genre and year
+router.get('/music/random-track', generalLimiter, musicController.getRandomTrack);
+
+// Get User Mood Analysis
+router.get('/music/mood-analysis', generalLimiter, musicController.getUserMoodAnalysis);
+
+// Get Context Playlist
+router.get('/music/context-playlist', generalLimiter, musicController.getContextPlaylist);
+
+// Get currently playing track (Requires User Token)
+router.get('/music/now-playing', generalLimiter, musicController.getNowPlaying);
+
 /**
  * EEG Analysis Routes
  */
@@ -82,8 +98,20 @@ router.post(
 // Get analysis history for a user
 router.get('/analysis/history/:userId', readLimiter, analysisController.getAnalysisHistory);
 
+// Reset analysis history
+router.delete('/analysis/history/:userId', databaseLimiter, analysisController.resetHistory);
+
+// Get analysis count
+router.get('/analysis/count/:userId', readLimiter, analysisController.getAnalysisCount);
+
 // Get latest analysis result for a user
 router.get('/analysis/latest/:userId', readLimiter, analysisController.getLatestAnalysis);
+
+// Analyze GitHub Activity
+router.post('/analyze/github', generalLimiter, analysisController.analyzeGithub);
+
+// Generate AI Interpretation for existing analysis
+router.post('/analyze/ai-interpretation', generalLimiter, analysisController.generateAIInterpretation);
 
 /**
  * Health check route

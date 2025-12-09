@@ -1,163 +1,112 @@
 <!DOCTYPE html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NeuroTune - 메인</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap"
-      rel="stylesheet"
-    />
-
-    <link rel="stylesheet" href="../assets/css/common.css" />
-    <link rel="stylesheet" href="main-page.css" />
-  </head>
-  <body>
-    <!-- Slide-in Sidebar -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-content">
-        <h2 class="sidebar-title">나의 뇌파 분석</h2>
-
-        <!-- Latest mood state -->
-        <div class="mood-summary">
-          <h3>현재 상태</h3>
-          <div class="mood-badges">
-            <span class="mood-badge">집중력 <strong id="engagement">75%</strong></span>
-            <span class="mood-badge">긴장도 <strong id="arousal">60%</strong></span>
-            <span class="mood-badge">감정 <strong id="valence">80%</strong></span>
-          </div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroTune - Main</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=Pretendard:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/common.css">
+    <link rel="stylesheet" href="main-page.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="main-header">
+        <div class="logo-area centered">
+            <h1>NeuroTune</h1>
         </div>
-
-        <!-- Brain wave visualization -->
-        <div class="brainwave-viz">
-          <h3>뇌파 패턴</h3>
-          <div class="wave-bars">
-            <div class="wave-bar" style="--height: 70%">
-              <span>Theta</span>
-            </div>
-            <div class="wave-bar" style="--height: 85%">
-              <span>Alpha</span>
-            </div>
-            <div class="wave-bar" style="--height: 60%">
-              <span>Beta</span>
-            </div>
-            <div class="wave-bar" style="--height: 45%">
-              <span>Gamma</span>
-            </div>
-          </div>
+        <div class="header-controls">
+             <button id="logoutBtn" class="btn-text">LOGOUT</button>
         </div>
+    </header>
 
-        <!-- Preference profile -->
-        <div class="preference-summary">
-          <h3>음악 선호도</h3>
-          <div class="preference-tags">
-            <span class="tag">차분한 멜로디</span>
-            <span class="tag">높은 에너지</span>
-            <span class="tag">긍정적 분위기</span>
-          </div>
+    <!-- Left Sidebar (Hover to Open) -->
+    <div class="left-sidebar-trigger"></div>
+    <aside class="left-sidebar" id="leftSidebar">
+        <div class="sidebar-content">
+            <h3>MY DATA</h3>
+            <div class="stat-box">
+                <p class="stat-label">Analyzed Songs</p>
+                <p class="stat-value" id="totalAnalyzedCount">0</p>
+            </div>
+            <button id="resetDataBtn" class="btn-danger">RESET DATA</button>
         </div>
-      </div>
     </aside>
 
-    <!-- Hover trigger for sidebar -->
-    <div class="sidebar-trigger" id="sidebarTrigger"></div>
+    <div class="layout-container">
+        <main class="main-content">
+            <!-- Section 1: Current Mood -->
+            <section class="content-section">
+                <div class="section-header">
+                    <h2>CURRENT MOOD</h2>
+                    <p>AI가 분석한 당신의 현재 상태입니다.</p>
+                </div>
+                <div class="mood-container" id="moodContainer">
+                    <div class="loading-placeholder">
+                        <div class="loading"></div>
+                        <p>기분을 분석하는 중...</p>
+                    </div>
+                </div>
+            </section>
 
-    <!-- AI Analysis Modal -->
-    <div class="ai-analysis-modal" id="aiModal" style="display: none">
-      <div class="ai-modal-content">
-        <button class="ai-close-btn" id="aiCloseBtn">×</button>
-        <h3>🤖 AI 음악 분석</h3>
-        <div class="ai-analysis-result" id="aiResult">
-          <div class="loading"></div>
-          <p>AI가 당신의 음악 취향을 분석하고 있습니다...</p>
-        </div>
-      </div>
+            <!-- Section 2: Split View -->
+            <div class="split-section">
+                <!-- Left: Recent EEG Analysis -->
+                <section class="panel analysis-panel">
+                    <div class="panel-header">
+                        <h3>RECENT ANALYSIS</h3>
+                        <p>최근 분석된 곡들입니다.</p>
+                    </div>
+                    <div class="analysis-list" id="analysisList">
+                        <!-- Items will be injected here -->
+                        <div class="loading-placeholder">
+                            <div class="loading"></div>
+                            <p>분석 기록을 불러오는 중...</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Right: Context Playlist -->
+                <section class="panel playlist-panel">
+                    <div class="panel-header">
+                        <h3>CONTEXT PLAYLIST</h3>
+                        <p id="playlistContextText">현재 상태에 맞는 추천 플레이리스트</p>
+                    </div>
+                    <div class="playlist-list" id="studyPlaylist">
+                        <div class="loading-placeholder">
+                            <div class="loading"></div>
+                            <p>플레이리스트 생성 중...</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
     </div>
 
-    <!-- Main Content -->
-    <main class="main-content">
-      <!-- Header -->
-      <header class="header">
-        <h1 class="logo">NeuroTune</h1>
-        <div class="header-actions">
-          <button class="btn-icon ai-btn" id="aiAnalysisBtn" title="AI 분석">
-            🤖
-          </button>
-          <div class="user-info">
-            <span id="userName">사용자</span>님
-          </div>
+    <!-- Analysis Detail Modal -->
+    <div id="analysisModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="modalTitle">Analysis Result</h2>
+            <div class="modal-body">
+                <div class="modal-summary">
+                    <p id="modalText">분석 결과 내용...</p>
+                </div>
+                <div class="modal-charts">
+                    <div class="chart-box">
+                        <h4>Focus vs Relax</h4>
+                        <canvas id="modalChart1"></canvas>
+                    </div>
+                    <div class="chart-box">
+                        <h4>Brain Waves</h4>
+                        <canvas id="modalChart2"></canvas>
+                    </div>
+                </div>
+            </div>
         </div>
-      </header>
-
-      <!-- Search Section -->
-      <section class="search-section">
-        <div class="search-box">
-          <input 
-            type="text" 
-            id="searchInput" 
-            placeholder="곡, 아티스트, 앨범 검색..." 
-            class="search-input"
-          />
-          <button class="search-btn" id="searchBtn">🔍</button>
-        </div>
-        <div class="search-results" id="searchResults" style="display: none"></div>
-      </section>
-
-      <!-- Album Slider Section -->
-      <section class="album-slider-section">
-        <h2 class="section-title">추천 앨범</h2>
-        <div class="album-slider" id="albumSlider">
-          <!-- Albums will be dynamically loaded -->
-        </div>
-      </section>
-
-      <!-- Context Selection -->
-      <section class="context-section">
-        <h2 class="section-title">지금 기분은 어떠신가요?</h2>
-        <div class="context-buttons">
-          <button class="context-btn" data-context="study">
-            <span class="context-icon">📚</span>
-            <span>공부</span>
-          </button>
-          <button class="context-btn" data-context="workout">
-            <span class="context-icon">💪</span>
-            <span>운동</span>
-          </button>
-          <button class="context-btn" data-context="relax">
-            <span class="context-icon">😌</span>
-            <span>휴식</span>
-          </button>
-          <button class="context-btn" data-context="sleep">
-            <span class="context-icon">😴</span>
-            <span>수면 전</span>
-          </button>
-          <button class="context-btn" data-context="commute">
-            <span class="context-icon">🚇</span>
-            <span>출퇴근</span>
-          </button>
-          <button class="context-btn" data-context="stress">
-            <span class="context-icon">🧘</span>
-            <span>스트레스 해소</span>
-          </button>
-          <button class="context-btn" data-context="happy">
-            <span class="context-icon">😊</span>
-            <span>기분 좋음</span>
-          </button>
-        </div>
-      </section>
-
-      <!-- Playlist Section -->
-      <section class="playlist-section" id="playlistSection" style="display: none">
-        <h2 class="section-title">맞춤 플레이리스트</h2>
-        <div class="playlist-container" id="playlistContainer">
-          <!-- Playlist will be dynamically loaded -->
-        </div>
-      </section>
-    </main>
+    </div>
 
     <script src="../assets/js/08-main.js"></script>
-  </body>
+</body>
 </html>

@@ -1,239 +1,264 @@
 #!/usr/bin/env python3
 """
 EEG Signal Processing Script for NeuroTune
-Analyzes EEG, ECG, and GSR data to calculate engagement, arousal, valence, and preference scores
+Analyzes EEG data to calculate engagement, arousal, valence, and preference scores.
+Robustly handles specific file formats provided by the user (Biomarkers.txt).
 """
 
 import sys
 import json
-import numpy as np
+import math
 
+# Try to import numpy, but provide a fallback if missing for maximum robustness
+try:
+    import numpy as np
+    HAS_NUMPY = True
+except ImportError:
+    HAS_NUMPY = False
+    sys.stderr.write("Warning: numpy not found, using pure Python fallback\n")
 
-def load_data(filepath):
+def load_biomarkers(filepath):
     """
-    Load data from a text file
+    Load data from Biomarkers.txt.
+    Format: Tab-separated.
+    Row 0: Header (Time, Fp1_Delta, ...)
+    Col 0: Time string (e.g. " 1:49:25.583") - SKIP
+    Cols 1+: Numeric values (Float)
+    """
+    encodings = ['utf-8', 'cp949', 'euc-kr', 'latin1']
     
-    Args:
-        filepath: Path to the data file
-        
-    Returns:
-        numpy array of data values
+    for encoding in encodings:
+        try:
+            data = []
+            with open(filepath, 'r', encoding=encoding) as f:
+                lines = f.readlines()
+                
+                # Need at least header and one data row
+                if len(lines) < 2:
+                    continue
+                
+                # Process rows skipping the header
+                for line_idx, line in enumerate(lines[1:]):
+                    line = line.strip()
+                    if not line:
+                        continue
+                        
+                    parts = line.split('\t')
+                    
+                    # We expect at least 14 columns (Time + 5 bands * 2 channels + Heartbeat + SDNN + RMSSD)
+                    # But let's be flexible and just take what's numeric from index 1
+                    row_vals = []
+                    
+                    # Start from index 1 to skip Time column
+                    for i in range(1, len(parts)):
+                        val_str = parts[i].strip()
+                        if not val_str:
+                            continue
+                        try:
+                            val = float(val_str)
+                            row_vals.append(val)
+                        except ValueError:
+                            pass # Skip non-numeric garbage
+                            
+                    if row_vals:
+                        data.append(row_vals)
+            
+            if data:
+                # Normalize row lengths
+                # Find the most common row length
+                lengths = {}
+                for row in data:
+                    l = len(row)
+                    lengths[l] = lengths.get(l, 0) + 1
+                
+                if not lengths:
+                    return []
+                    
+                common_len = max(lengths, key=lengths.get)
+                
+                # Filter rows that don't match the common length
+                clean_data = [row for row in data if len(row) == common_len]
+                
+                sys.stderr.write(f"Successfully loaded {len(clean_data)} rows (filtered from {len(data)}) from {filepath} using {encoding}. Common columns: {common_len}\n")
+                return clean_data
+                
+        except UnicodeDecodeError:
+            continue
+        except Exception as e:
+            sys.stderr.write(f"Warning: Failed to load {filepath} with {encoding}: {e}\n")
+            continue
+
+    sys.stderr.write(f"Error: Could not load biomarkers from {filepath}\n")
+    return []
+
+def calculate_metrics(data):
     """
+    Calculate metrics from the loaded biomarker data.
+    Expected columns in data (after skipping Time):
+    0: Fp1_Delta
+    1: Fp1_Theta
+    2: Fp1_Alpha
+    3: Fp1_Beta
+    4: Fp1_Gamma
+    5: Fp2_Delta
+    6: Fp2_Theta
+    7: Fp2_Alpha
+    8: Fp2_Beta
+    9: Fp2_Gamma
+    10: Heartbeat
+    11: SDNN
+    12: RMSSD
+    """
+    if not data:
+        return None
+
+    # Calculate column averages
+    if HAS_NUMPY:
+        avg = np.mean(np.array(data), axis=0)
+    else:
+        # Pure python average
+        cols = len(data[0])
+        sums = [0.0] * cols
+        count = len(data)
+        for row in data:
+            for i in range(min(len(row), cols)):
+                sums[i] += row[i]
+        avg = [s / count for s in sums]
+
+    # Ensure we have enough columns
+    # We need at least 10 columns for the bands
+    if len(avg) < 10:
+        sys.stderr.write("Error: Insufficient columns in biomarker data\n")
+        return None
+
+    # Extract Band Powers (Averaged over time)
+    fp1_theta = avg[1]
+    fp1_alpha = avg[2]
+    fp1_beta = avg[3]
+    fp1_gamma = avg[4]
+    
+    fp2_theta = avg[6]
+    fp2_alpha = avg[7]
+    fp2_beta = avg[8]
+    fp2_gamma = avg[9]
+    
+    # Average Left (Fp1) and Right (Fp2)
+    theta = (fp1_theta + fp2_theta) / 2
+    alpha = (fp1_alpha + fp2_alpha) / 2
+    beta = (fp1_beta + fp2_beta) / 2
+    gamma = (fp1_gamma + fp2_gamma) / 2
+    
+    # Avoid division by zero
+    epsilon = 1e-10
+    
+    # --- Metrics Calculation ---
+    
+    # Focus: Beta / Theta
+    # Higher Beta (active thinking) relative to Theta (drowsy/idling)
+    focus = beta / (theta + epsilon)
+    
+    # Relax: Alpha / Theta
+    # Alpha is relaxation, Theta is drowsiness. 
+    # Alternatively: Alpha / Beta (Relaxation vs Alertness)
+    # Let's use Alpha / Beta as it's more standard for "Relaxation"
+    relax = alpha / (beta + epsilon)
+    
+    # Excite: Beta / Alpha
+    # Inverse of relax. Or (Beta + Gamma) / Alpha
+    excite = (beta + gamma) / (alpha + epsilon)
+    
+    # Preference (Valence/Like): Frontal Alpha Asymmetry (FAA)
+    # ln(Right Alpha) - ln(Left Alpha)
+    # Higher value = More Left Activation (Approach/Like) = Higher Preference
+    # Note: Lower Alpha power = Higher Activity.
+    # So if Right Alpha > Left Alpha, then Left is more active -> Positive Emotion.
     try:
-        # Try to load as space/comma separated values
-        data = np.loadtxt(filepath)
-        return data
-    except Exception as e:
-        print(f"Error loading {filepath}: {e}", file=sys.stderr)
-        print("Expected file format: numeric values separated by spaces or commas, one value per line or multiple values per line", file=sys.stderr)
-        raise
-
-
-def calculate_theta_power(eeg1_data, eeg2_data):
-    """
-    Calculate theta power (4-8 Hz) from EEG data
-    This is a mock/heuristic calculation for demonstration
-    
-    Args:
-        eeg1_data: First EEG channel data
-        eeg2_data: Second EEG channel data
+        # Use log for better asymmetry measure if values are positive
+        if fp1_alpha > 0 and fp2_alpha > 0:
+            preference_score = math.log(fp2_alpha) - math.log(fp1_alpha)
+        else:
+            preference_score = (fp2_alpha - fp1_alpha) / (fp2_alpha + fp1_alpha + epsilon)
+    except:
+        preference_score = 0
         
-    Returns:
-        Theta power value (normalized 0-1)
-    """
-    # Simple heuristic: use variance and mean of combined signals
-    combined = np.concatenate([eeg1_data.flatten(), eeg2_data.flatten()])
-    
-    # Calculate variance as a proxy for power
-    variance = np.var(combined)
-    mean_abs = np.mean(np.abs(combined))
-    
-    # Normalize using sigmoid-like function
-    theta_power = 1 / (1 + np.exp(-0.5 * (variance + mean_abs)))
-    
-    return float(theta_power)
+    # Normalize Preference to 0-1 range roughly
+    # FAA is usually between -1 and 1, but can be wider.
+    # Sigmoid: 1 / (1 + exp(-x))
+    preference = 1 / (1 + math.exp(-preference_score))
 
-
-def calculate_hrv(ecg_data):
-    """
-    Calculate Heart Rate Variability (HRV) from ECG data
-    This is a mock/heuristic calculation for demonstration
+    # Other composite metrics
+    engagement = beta / (alpha + theta + epsilon)
+    arousal = beta / (alpha + epsilon)
+    valence = preference # FAA is a measure of valence
     
-    Args:
-        ecg_data: ECG signal data
+    # HRV
+    hrv = 0
+    if len(avg) > 12:
+        hrv = avg[12] # RMSSD
+    elif len(avg) > 11:
+        hrv = avg[11] # SDNN
         
-    Returns:
-        HRV value (normalized 0-1)
-    """
-    # Simple heuristic: use standard deviation of differences
-    ecg_flat = ecg_data.flatten()
-    
-    if len(ecg_flat) < 2:
-        return 0.5
-    
-    # Calculate differences between consecutive points
-    diffs = np.diff(ecg_flat)
-    
-    # Use standard deviation as HRV measure
-    hrv = np.std(diffs)
-    
-    # Normalize to 0-1 range
-    hrv_normalized = 1 / (1 + np.exp(-hrv))
-    
-    return float(hrv_normalized)
+    # P300 Latency
+    # Cannot be calculated from spectral biomarkers. 
+    # Return a placeholder or 0.
+    p300_latency = 300.0 
 
-
-def calculate_p300_latency(eeg1_data, eeg2_data):
-    """
-    Calculate P300 latency from EEG data
-    P300 is an event-related potential component
-    This is a mock/heuristic calculation for demonstration
-    
-    Args:
-        eeg1_data: First EEG channel data
-        eeg2_data: Second EEG channel data
-        
-    Returns:
-        P300 latency value (normalized 0-1)
-    """
-    # Simple heuristic: find peak in averaged signal
-    combined = (eeg1_data.flatten() + eeg2_data.flatten()) / 2
-    
-    # Find the index of maximum absolute value
-    peak_idx = np.argmax(np.abs(combined))
-    
-    # Normalize by length
-    latency = peak_idx / len(combined)
-    
-    return float(latency)
-
-
-def calculate_engagement(theta_power, p300_latency):
-    """
-    Calculate engagement score based on theta power and P300 latency
-    
-    Args:
-        theta_power: Theta power value
-        p300_latency: P300 latency value
-        
-    Returns:
-        Engagement score (0-1)
-    """
-    # Higher theta power and earlier P300 (lower latency) indicate higher engagement
-    engagement = (theta_power * 0.6) + ((1 - p300_latency) * 0.4)
-    
-    return float(np.clip(engagement, 0, 1))
-
-
-def calculate_arousal(hrv, gsr_data):
-    """
-    Calculate arousal score based on HRV and GSR
-    
-    Args:
-        hrv: Heart rate variability
-        gsr_data: GSR signal data
-        
-    Returns:
-        Arousal score (0-1)
-    """
-    # Calculate GSR level (mean of absolute values)
-    gsr_level = np.mean(np.abs(gsr_data.flatten()))
-    
-    # Normalize GSR
-    gsr_normalized = 1 / (1 + np.exp(-gsr_level))
-    
-    # Higher GSR and lower HRV typically indicate higher arousal
-    arousal = (gsr_normalized * 0.6) + ((1 - hrv) * 0.4)
-    
-    return float(np.clip(arousal, 0, 1))
-
-
-def calculate_valence(theta_power, hrv, arousal):
-    """
-    Calculate valence (positive/negative emotion) score
-    
-    Args:
-        theta_power: Theta power value
-        hrv: Heart rate variability
-        arousal: Arousal score
-        
-    Returns:
-        Valence score (0-1), where higher values indicate more positive emotion
-    """
-    # Higher theta power and HRV with moderate arousal indicate positive valence
-    valence = (theta_power * 0.4) + (hrv * 0.3) + ((1 - abs(arousal - 0.5) * 2) * 0.3)
-    
-    return float(np.clip(valence, 0, 1))
-
-
-def calculate_overall_preference(engagement, arousal, valence):
-    """
-    Calculate overall music preference score
-    
-    Args:
-        engagement: Engagement score
-        arousal: Arousal score
-        valence: Valence score
-        
-    Returns:
-        Overall preference score (0-1)
-    """
-    # Weighted average favoring engagement and valence
-    preference = (engagement * 0.4) + (valence * 0.4) + (arousal * 0.2)
-    
-    return float(np.clip(preference, 0, 1))
-
+    return {
+        "theta_power": theta,
+        "hrv": hrv,
+        "p300_latency": p300_latency,
+        "engagement": engagement,
+        "arousal": arousal,
+        "valence": valence,
+        "overall_preference": preference, # Use the calculated preference
+        "focus": focus,
+        "relax": relax,
+        "excite": excite,
+        "preference": preference
+    }
 
 def main():
-    """
-    Main function to process EEG data files and output results as JSON
-    """
     if len(sys.argv) != 5:
-        print("Error: Exactly 4 file paths are required (eeg1, eeg2, ecg, gsr)", file=sys.stderr)
+        sys.stderr.write("Error: Exactly 4 file paths are required\n")
         sys.exit(1)
     
-    # Get file paths from command line arguments
-    eeg1_path = sys.argv[1]
-    eeg2_path = sys.argv[2]
-    ecg_path = sys.argv[3]
-    gsr_path = sys.argv[4]
+    # eeg1_path = sys.argv[1] # Rawdata
+    # eeg2_path = sys.argv[2] # Fp1_FFT
+    # ecg_path = sys.argv[3]  # Fp2_FFT
+    gsr_path = sys.argv[4]  # Biomarkers.txt
     
     try:
-        # Load data from files
-        eeg1_data = load_data(eeg1_path)
-        eeg2_data = load_data(eeg2_path)
-        ecg_data = load_data(ecg_path)
-        gsr_data = load_data(gsr_path)
+        # We primarily use Biomarkers.txt as it contains the processed band powers
+        data = load_biomarkers(gsr_path)
         
-        # Calculate signal metrics
-        theta_power = calculate_theta_power(eeg1_data, eeg2_data)
-        hrv = calculate_hrv(ecg_data)
-        p300_latency = calculate_p300_latency(eeg1_data, eeg2_data)
-        
-        # Calculate derived metrics
-        engagement = calculate_engagement(theta_power, p300_latency)
-        arousal = calculate_arousal(hrv, gsr_data)
-        valence = calculate_valence(theta_power, hrv, arousal)
-        overall_preference = calculate_overall_preference(engagement, arousal, valence)
-        
-        # Prepare result as JSON
-        result = {
-            "theta_power": round(theta_power, 4),
-            "hrv": round(hrv, 4),
-            "p300_latency": round(p300_latency, 4),
-            "engagement": round(engagement, 4),
-            "arousal": round(arousal, 4),
-            "valence": round(valence, 4),
-            "overall_preference": round(overall_preference, 4)
-        }
-        
+        if not data:
+            # Fallback: Return default values if data loading fails
+            # This prevents the frontend from breaking
+            sys.stderr.write("Warning: No data loaded, returning defaults\n")
+            result = {
+                "theta_power": 0, "hrv": 0, "p300_latency": 0,
+                "engagement": 0.5, "arousal": 0.5, "valence": 0.5,
+                "overall_preference": 0.5, "focus": 0.5, "relax": 0.5,
+                "excite": 0.5, "preference": 0.5
+            }
+        else:
+            metrics = calculate_metrics(data)
+            if metrics:
+                result = metrics
+            else:
+                result = {
+                    "theta_power": 0, "hrv": 0, "p300_latency": 0,
+                    "engagement": 0.5, "arousal": 0.5, "valence": 0.5,
+                    "overall_preference": 0.5, "focus": 0.5, "relax": 0.5,
+                    "excite": 0.5, "preference": 0.5
+                }
+                
         # Output JSON to stdout
         print(json.dumps(result))
         
     except Exception as e:
-        print(f"Error processing data: {e}", file=sys.stderr)
+        sys.stderr.write(f"Error in main process: {e}\n")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

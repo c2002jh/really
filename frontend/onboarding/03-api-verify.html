@@ -361,25 +361,19 @@
         const continueBtn = document.getElementById('continueBtn');
         const skipBtn = document.getElementById('skipBtn');
 
-        const criticalChecks = checks.backend && checks.user && checks.mongodb;
-        const allChecks = criticalChecks && checks.spotify;
+        // Spotify is now considered critical because the app depends on it for music
+        const criticalChecks = checks.backend && checks.user && checks.mongodb && checks.spotify;
 
-        if (allChecks) {
+        if (criticalChecks) {
           overallDiv.className = 'overall-status all-good';
           overallDiv.textContent = '✓ 모든 시스템이 정상적으로 작동하고 있습니다!';
           overallDiv.style.display = 'block';
           continueBtn.disabled = false;
           continueBtn.textContent = '다음 단계로 이동';
-        } else if (criticalChecks) {
-          overallDiv.className = 'overall-status partial';
-          overallDiv.textContent = '⚠ 일부 기능이 제한될 수 있습니다';
-          overallDiv.style.display = 'block';
-          continueBtn.disabled = false;
-          continueBtn.textContent = '계속하기';
           skipBtn.style.display = 'none';
         } else {
           overallDiv.className = 'overall-status failed';
-          overallDiv.textContent = '✗ 시스템 연결에 문제가 있습니다';
+          overallDiv.textContent = '✗ 필수 시스템 연결에 문제가 있습니다 (Spotify 포함)';
           overallDiv.style.display = 'block';
           continueBtn.disabled = true;
           skipBtn.style.display = 'block';
