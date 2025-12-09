@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>장르 선택 - NeuroTune</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="../assets/css/common.css" />
+    <style>
+      .genre-content {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 20px;
+        overflow-y: auto;
+      }
+
+      .genre-title {
+        margin: 0 0 8px 0;
+        font-size: 32px;
+        font-weight: 400;
+        letter-spacing: -0.07em;
+        text-align: center;
+        color: var(--color-dark);
+      }
+
+      .genre-subtitle {
+        margin: 0 0 40px 0;
+        font-size: 16px;
+        color: var(--color-text-gray);
+        text-align: center;
+      }
+
+      .selected-count {
+        font-size: 14px;
+        color: var(--color-text-gray);
+        margin-bottom: 24px;
+      }
+
+      .genre-row {
+        width: 100%;
+        max-width: 1200px;
+        margin-bottom: 32px;
+        overflow-x: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-accent-strong) var(--color-border);
+      }
+
+      .genre-row::-webkit-scrollbar {
+        height: 8px;
+      }
+
+      .genre-row::-webkit-scrollbar-track {
+        background: var(--color-border);
+        border-radius: 4px;
+      }
+
+      .genre-row::-webkit-scrollbar-thumb {
+        background: var(--color-accent-strong);
+        border-radius: 4px;
+      }
+
+      .genre-row-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        color: var(--color-dark);
+        padding-left: 8px;
+      }
+
+      .genre-cards-container {
+        display: flex;
+        gap: 16px;
+        padding-bottom: 8px;
+      }
+
+      .genre-card {
+        flex-shrink: 0;
+        width: 200px;
+        height: 240px;
+        border: 3px solid var(--color-border);
+        border-radius: 16px;
+        background-color: white;
+        cursor: pointer;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .genre-card:hover {
+        border-color: var(--color-accent-strong);
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      }
+
+      .genre-card.selected {
+        border-color: var(--color-accent-strong);
+        box-shadow: 0 0 0 3px rgba(219, 255, 68, 0.3);
+      }
+
+      .genre-card-image {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+        background-color: var(--color-border);
+        position: relative;
+      }
+
+      .genre-card-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .genre-card-image.loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+      }
+
+      @keyframes loading {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+
+      .genre-card-name {
+        padding: 16px;
+        font-size: 16px;
+        font-weight: 600;
+        text-align: center;
+        color: var(--color-dark);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .genre-card.selected .genre-card-name {
+        background-color: var(--color-accent-strong);
+      }
+
+      .selected-badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 32px;
+        height: 32px;
+        background-color: var(--color-accent-strong);
+        border-radius: 50%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        font-weight: bold;
+        color: var(--color-dark);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .genre-card.selected .selected-badge {
+        display: flex;
+      }
+
+      .continue-btn {
+        min-width: 200px;
+        padding: 14px 32px;
+        font-size: 16px;
+        margin-top: 16px;
+      }
+
+      .continue-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .refresh-hint {
+        font-size: 13px;
+        color: var(--color-text-gray);
+        margin-top: 8px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page-wrapper">
+      <img
+        src="../../logo_page/icon/neurotune_icon.png"
+        alt="NeuroTune background icon"
+        class="bg-logo-icon"
+      />
+
+      <section class="genre-content fade-in">
+        <h1 class="genre-title">좋아하는 음악 장르를 선택하세요</h1>
+        <p class="genre-subtitle">최대 5개까지 선택 가능합니다</p>
+
+        <p class="selected-count" id="selectedCount">선택: 0 / 5</p>
+
+        <div id="genreRowsContainer">
+          <!-- Genre rows will be loaded here -->
+        </div>
+
+        <button class="btn continue-btn" id="continueBtn" disabled>
+          다음 단계
+        </button>
+        
+        <p class="refresh-hint">💡 페이지를 새로고침하면 다른 앨범 커버를 볼 수 있어요</p>
+      </section>
+    </main>
+
+    <script>
+      const API_BASE_URL = 'http://localhost:5000/api';
+      const selectedGenres = [];
+      const MAX_GENRES = 5;
+
+      // Define genre categories
+      const genreCategories = {
+        'Popular': ['pop', 'k-pop', 'indie', 'acoustic'],
+        'Rock & Alternative': ['rock', 'alt-rock', 'punk', 'grunge', 'metal'],
+        'Urban': ['hip-hop', 'r-n-b', 'soul', 'funk', 'rap'],
+        'Electronic': ['edm', 'house', 'techno', 'dubstep', 'trance'],
+        'Classical & Jazz': ['classical', 'jazz', 'blues', 'opera'],
+        'World': ['latin', 'reggae', 'afrobeat', 'country', 'folk']
+      };
+
+      async function loadGenres() {
+        try {
+          const container = document.getElementById('genreRowsContainer');
+          let availableGenres = [];
+          
+          // Try to fetch from Spotify API
+          try {
+            const response = await fetch(`${API_BASE_URL}/auth/genres`);
+            if (response.ok) {
+              const data = await response.json();
+              availableGenres = data.data || [];
+            }
+          } catch (apiError) {
+            console.warn('Could not fetch from Spotify, using fallback genres');
+          }
+          
+          // If no genres from API, use all defined genres as fallback
+          if (availableGenres.length === 0) {
+            availableGenres = Object.values(genreCategories).flat();
+            console.log('Using fallback genres:', availableGenres);
+          }
+          
+          // Create rows for each category
+          for (const [category, genres] of Object.entries(genreCategories)) {
+            const categoryGenres = genres.filter(g => availableGenres.includes(g));
+            
+            if (categoryGenres.length > 0) {
+              const row = createGenreRow(category, categoryGenres);
+              container.appendChild(row);
+            }
+          }
+          
+          // Load album covers for all genres (will use fallback if API fails)
+          loadAlbumCovers();
+          
+        } catch (error) {
+          console.error('Error loading genres:', error);
+          alert('장르 목록을 불러오는데 실패했습니다. 페이지를 새로고침해주세요.');
+        }
+      }
+
+      function createGenreRow(categoryName, genres) {
+        const row = document.createElement('div');
+        row.className = 'genre-row';
+        
+        const title = document.createElement('div');
+        title.className = 'genre-row-title';
+        title.textContent = categoryName;
+        
+        const cardsContainer = document.createElement('div');
+        cardsContainer.className = 'genre-cards-container';
+        
+        genres.forEach(genre => {
+          const card = createGenreCard(genre);
+          cardsContainer.appendChild(card);
+        });
+        
+        row.appendChild(title);
+        row.appendChild(cardsContainer);
+        
+        return row;
+      }
+
+      function createGenreCard(genre) {
+        const card = document.createElement('div');
+        card.className = 'genre-card';
+        card.dataset.genre = genre;
+        
+        const imageDiv = document.createElement('div');
+        imageDiv.className = 'genre-card-image loading';
+        imageDiv.dataset.genre = genre;
+        
+        const badge = document.createElement('div');
+        badge.className = 'selected-badge';
+        badge.textContent = '✓';
+        
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'genre-card-name';
+        nameDiv.textContent = genre.replace(/-/g, ' ').toUpperCase();
+        
+        card.appendChild(imageDiv);
+        card.appendChild(badge);
+        card.appendChild(nameDiv);
+        
+        card.addEventListener('click', () => toggleGenre(genre, card));
+        
+        return card;
+      }
+
+      async function loadAlbumCovers() {
+        const imageContainers = document.querySelectorAll('.genre-card-image');
+        
+        for (const container of imageContainers) {
+          const genre = container.dataset.genre;
+          try {
+            const response = await fetch(`${API_BASE_URL}/auth/genre-cover/${genre}`);
+            if (response.ok) {
+              const data = await response.json();
+              if (data.coverUrl) {
+                const img = document.createElement('img');
+                img.src = data.coverUrl;
+                img.alt = `${genre} album cover`;
+                img.onload = () => {
+                  container.classList.remove('loading');
+                  container.appendChild(img);
+                };
+                img.onerror = () => {
+                  container.classList.remove('loading');
+                  container.textContent = '🎵';
+                  container.style.display = 'flex';
+                  container.style.alignItems = 'center';
+                  container.style.justifyContent = 'center';
+                  container.style.fontSize = '48px';
+                };
+              } else {
+                // No cover found, show music icon
+                container.classList.remove('loading');
+                container.textContent = '🎵';
+                container.style.display = 'flex';
+                container.style.alignItems = 'center';
+                container.style.justifyContent = 'center';
+                container.style.fontSize = '48px';
+              }
+            }
+          } catch (error) {
+            console.error(`Error loading cover for ${genre}:`, error);
+            container.classList.remove('loading');
+            container.textContent = '🎵';
+            container.style.display = 'flex';
+            container.style.alignItems = 'center';
+            container.style.justifyContent = 'center';
+            container.style.fontSize = '48px';
+          }
+        }
+      }
+
+      function toggleGenre(genre, card) {
+        const index = selectedGenres.indexOf(genre);
+        
+        if (index > -1) {
+          // Deselect
+          selectedGenres.splice(index, 1);
+          card.classList.remove('selected');
+        } else {
+          // Select if not at max
+          if (selectedGenres.length < MAX_GENRES) {
+            selectedGenres.push(genre);
+            card.classList.add('selected');
+          } else {
+            // Show alert if max reached
+            alert(`최대 ${MAX_GENRES}개까지만 선택할 수 있습니다.`);
+          }
+        }
+        
+        updateUI();
+      }
+
+      function updateUI() {
+        document.getElementById('selectedCount').textContent = 
+          `선택: ${selectedGenres.length} / ${MAX_GENRES}`;
+        
+        document.getElementById('continueBtn').disabled = selectedGenres.length === 0;
+      }
+
+      document.getElementById('continueBtn').addEventListener('click', async () => {
+        const userId = localStorage.getItem('neurotune_userId') || 'anonymous';
+        
+        try {
+          // Save selected genres
+          const response = await fetch(`${API_BASE_URL}/preferences`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: userId,
+              genres: selectedGenres
+            })
+          });
+
+          if (response.ok) {
+            localStorage.setItem('neurotune_genres', JSON.stringify(selectedGenres));
+            window.location.href = '06-device-connection.html';
+          } else {
+            alert('장르 저장 중 오류가 발생했습니다.');
+          }
+        } catch (error) {
+          console.error('Error saving genres:', error);
+          alert('장르 저장 중 오류가 발생했습니다.');
+        }
+      });
+
+      // Load genres on page load
+      loadGenres();
+    </script>
+  </body>
+</html>

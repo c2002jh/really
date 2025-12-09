@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>장르 선택 - NeuroTune</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="../assets/css/common.css" />
+    <style>
+      .genre-content {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 20px;
+        overflow-y: auto;
+      }
+
+      .genre-title {
+        margin: 0 0 8px 0;
+        font-size: 32px;
+        font-weight: 400;
+        letter-spacing: -0.07em;
+        text-align: center;
+        color: var(--color-dark);
+      }
+
+      .genre-subtitle {
+        margin: 0 0 40px 0;
+        font-size: 16px;
+        color: var(--color-text-gray);
+        text-align: center;
+      }
+
+      .genre-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 16px;
+        width: 100%;
+        max-width: 800px;
+        margin-bottom: 32px;
+      }
+
+      .genre-card {
+        padding: 24px 16px;
+        border: 2px solid var(--color-border);
+        border-radius: 16px;
+        background-color: white;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--color-dark);
+      }
+
+      .genre-card:hover {
+        border-color: var(--color-accent-strong);
+        transform: translateY(-4px);
+      }
+
+      .genre-card.selected {
+        border-color: var(--color-accent-strong);
+        background-color: var(--color-accent-strong);
+        color: var(--color-dark);
+      }
+
+      .continue-btn {
+        min-width: 200px;
+        padding: 14px 32px;
+        font-size: 16px;
+        margin-top: 16px;
+      }
+
+      .continue-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .selected-count {
+        font-size: 14px;
+        color: var(--color-text-gray);
+        margin-bottom: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page-wrapper">
+      <img
+        src="../../logo_page/icon/neurotune_icon.png"
+        alt="NeuroTune background icon"
+        class="bg-logo-icon"
+      />
+
+      <section class="genre-content fade-in">
+        <h1 class="genre-title">좋아하는 음악 장르를 선택하세요</h1>
+        <p class="genre-subtitle">최대 5개까지 선택 가능합니다</p>
+
+        <p class="selected-count" id="selectedCount">선택: 0 / 5</p>
+
+        <div class="genre-grid" id="genreGrid">
+          <!-- Genres will be loaded here -->
+        </div>
+
+        <button class="btn continue-btn" id="continueBtn" disabled>
+          다음 단계
+        </button>
+      </section>
+    </main>
+
+    <script>
+      const API_BASE_URL = 'http://localhost:5000/api';
+      const selectedGenres = [];
+      const MAX_GENRES = 5;
+
+      async function loadGenres() {
+        try {
+          const response = await fetch(`${API_BASE_URL}/auth/genres`);
+          if (response.ok) {
+            const data = await response.json();
+            const genres = data.data || [];
+            
+            const grid = document.getElementById('genreGrid');
+            
+            // Popular genres to display
+            const popularGenres = ['pop', 'rock', 'indie', 'k-pop', 'hip-hop', 'jazz', 
+                                    'classical', 'edm', 'r-n-b', 'country', 'latin', 'metal'];
+            
+            const displayGenres = popularGenres.filter(g => genres.includes(g));
+            
+            displayGenres.forEach(genre => {
+              const card = document.createElement('div');
+              card.className = 'genre-card';
+              card.textContent = genre.toUpperCase();
+              card.dataset.genre = genre;
+              
+              card.addEventListener('click', () => toggleGenre(genre, card));
+              
+              grid.appendChild(card);
+            });
+          }
+        } catch (error) {
+          console.error('Error loading genres:', error);
+        }
+      }
+
+      function toggleGenre(genre, card) {
+        const index = selectedGenres.indexOf(genre);
+        
+        if (index > -1) {
+          // Deselect
+          selectedGenres.splice(index, 1);
+          card.classList.remove('selected');
+        } else {
+          // Select if not at max
+          if (selectedGenres.length < MAX_GENRES) {
+            selectedGenres.push(genre);
+            card.classList.add('selected');
+          }
+        }
+        
+        updateUI();
+      }
+
+      function updateUI() {
+        document.getElementById('selectedCount').textContent = 
+          `선택: ${selectedGenres.length} / ${MAX_GENRES}`;
+        
+        document.getElementById('continueBtn').disabled = selectedGenres.length === 0;
+      }
+
+      document.getElementById('continueBtn').addEventListener('click', async () => {
+        const userId = localStorage.getItem('neurotune_userId') || 'anonymous';
+        
+        try {
+          // Save selected genres
+          const response = await fetch(`${API_BASE_URL}/preferences`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: userId,
+              genres: selectedGenres
+            })
+          });
+
+          if (response.ok) {
+            localStorage.setItem('neurotune_genres', JSON.stringify(selectedGenres));
+            window.location.href = '06-device-connection.html';
+          }
+        } catch (error) {
+          console.error('Error saving genres:', error);
+          alert('장르 저장 중 오류가 발생했습니다.');
+        }
+      });
+
+      // Load genres on page load
+      loadGenres();
+    </script>
+  </body>
+</html>

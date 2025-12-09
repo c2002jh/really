@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NeuroTune - EEG 기반 음악 추천</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="assets/css/common.css" />
+    <style>
+      .landing-page {
+        position: fixed;
+        inset: 0;
+        background-color: var(--color-bg);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 48px;
+      }
+
+      .logo-icon {
+        width: 200px;
+        height: auto;
+        animation: pulse 3s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.05); opacity: 0.9; }
+      }
+
+      .landing-title {
+        font-family: "Fjalla One", sans-serif;
+        font-size: 64px;
+        margin: 0;
+        color: var(--color-dark);
+        text-shadow: 0 0 20px var(--color-border);
+      }
+
+      .landing-subtitle {
+        font-size: 24px;
+        color: var(--color-text-gray);
+        margin: -32px 0 0 0;
+        text-align: center;
+      }
+
+      .landing-buttons {
+        display: flex;
+        gap: 16px;
+      }
+
+      .landing-btn {
+        min-width: 180px;
+        padding: 16px 32px;
+        font-size: 16px;
+      }
+
+      .features {
+        position: absolute;
+        bottom: 48px;
+        display: flex;
+        gap: 48px;
+        font-size: 14px;
+        color: var(--color-text-gray);
+      }
+
+      .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .feature-icon {
+        font-size: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="landing-page">
+      <img
+        src="../logo_page/icon/neurotune_icon.png"
+        alt="NeuroTune Icon"
+        class="logo-icon"
+      />
+
+      <section style="text-align: center">
+        <h1 class="landing-title">NeuroTune</h1>
+        <p class="landing-subtitle">EEG로 찾는 나만의 음악 취향</p>
+      </section>
+
+      <div class="landing-buttons">
+        <button class="btn landing-btn" onclick="window.location.href='onboarding/01-start.html'">
+          시작하기
+        </button>
+        <button class="btn btn-secondary landing-btn" onclick="window.location.href='main-page/07-main.html'">
+          메인으로
+        </button>
+      </div>
+
+      <div class="features">
+        <div class="feature-item">
+          <span class="feature-icon">🧠</span>
+          <span>EEG 기반 분석</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">🎵</span>
+          <span>맞춤형 추천</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">💚</span>
+          <span>실시간 피드백</span>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

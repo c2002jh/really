@@ -1,0 +1,566 @@
+/* Main Page Styles */
+
+body {
+  overflow: hidden;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  position: fixed;
+  left: -320px;
+  top: 0;
+  bottom: 0;
+  width: 320px;
+  background-color: white;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  transition: left 0.3s ease;
+  overflow-y: auto;
+}
+
+.sidebar.show {
+  left: 0;
+}
+
+.sidebar-content {
+  padding: 32px 24px;
+}
+
+.sidebar-title {
+  margin: 0 0 24px 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--color-dark);
+}
+
+/* Mood Summary */
+.mood-summary h3,
+.brainwave-viz h3,
+.preference-summary h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-dark);
+  margin: 0 0 12px 0;
+}
+
+.mood-summary,
+.brainwave-viz,
+.preference-summary {
+  margin-bottom: 32px;
+}
+
+.mood-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mood-badge {
+  padding: 12px 16px;
+  background-color: var(--color-bg);
+  border-radius: 8px;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mood-badge strong {
+  color: var(--color-accent-strong);
+  font-weight: 700;
+}
+
+/* Brain Wave Visualization */
+.wave-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  height: 120px;
+}
+
+.wave-bar {
+  flex: 1;
+  background: linear-gradient(to top, var(--color-accent-strong), var(--color-accent-soft));
+  border-radius: 4px 4px 0 0;
+  height: var(--height);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 8px;
+  transition: height 0.3s ease;
+}
+
+.wave-bar span {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-dark);
+}
+
+/* Preference Tags */
+.preference-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  padding: 6px 12px;
+  background-color: var(--color-accent-soft);
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--color-dark);
+}
+
+/* Sidebar Trigger */
+.sidebar-trigger {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  z-index: 999;
+  cursor: pointer;
+}
+
+/* Main Content */
+.main-content {
+  margin-left: 0;
+  padding: 24px;
+  height: 100vh;
+  overflow-y: auto;
+  transition: margin-left 0.3s ease;
+}
+
+.sidebar.show ~ .main-content {
+  margin-left: 320px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  margin-bottom: 32px;
+}
+
+.logo {
+  margin: 0;
+  font-family: "Fjalla One", sans-serif;
+  font-size: 32px;
+  color: var(--color-dark);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.btn-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  background-color: white;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-icon:hover {
+  border-color: var(--color-accent-strong);
+  background-color: var(--color-accent-soft);
+  transform: scale(1.1);
+}
+
+.user-info {
+  font-size: 16px;
+  color: var(--color-text-gray);
+}
+
+/* AI Analysis Modal */
+.ai-analysis-modal {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s;
+}
+
+.ai-modal-content {
+  position: relative;
+  background-color: white;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s;
+}
+
+.ai-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background-color: transparent;
+  font-size: 28px;
+  cursor: pointer;
+  color: var(--color-text-gray);
+}
+
+.ai-close-btn:hover {
+  color: var(--color-dark);
+}
+
+.ai-analysis-result {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.ai-analysis-content h4 {
+  margin: 16px 0 8px 0;
+  color: var(--color-dark);
+}
+
+.ai-analysis-content p {
+  line-height: 1.6;
+  color: var(--color-dark);
+}
+
+.ai-recommendations ul {
+  text-align: left;
+  padding-left: 20px;
+}
+
+.ai-recommendations li {
+  margin: 8px 0;
+  line-height: 1.5;
+}
+
+/* Search Section */
+.search-section {
+  margin-bottom: 32px;
+  position: relative;
+}
+
+.search-box {
+  display: flex;
+  gap: 8px;
+  max-width: 600px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 12px 20px;
+  border: 2px solid var(--color-border);
+  border-radius: 999px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.search-input:focus {
+  border-color: var(--color-accent-strong);
+}
+
+.search-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background-color: var(--color-accent-strong);
+  font-size: 20px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.search-btn:hover {
+  transform: scale(1.1);
+}
+
+.search-results {
+  position: absolute;
+  top: 60px;
+  left: 0;
+  right: 0;
+  max-width: 600px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.search-result-item:hover {
+  background-color: var(--color-bg);
+}
+
+.search-result-item img {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.search-result-info {
+  flex: 1;
+}
+
+.search-result-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-dark);
+  margin-bottom: 4px;
+}
+
+.search-result-artist {
+  font-size: 12px;
+  color: var(--color-text-gray);
+}
+
+.play-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background-color: var(--color-accent-strong);
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.play-btn:hover {
+  transform: scale(1.1);
+}
+
+/* Section Titles */
+.section-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--color-dark);
+  margin: 0 0 24px 0;
+}
+
+/* Album Slider */
+.album-slider-section {
+  margin-bottom: 48px;
+}
+
+.album-slider {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 8px 0;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.album-slider::-webkit-scrollbar {
+  height: 8px;
+}
+
+.album-slider::-webkit-scrollbar-track {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+.album-slider::-webkit-scrollbar-thumb {
+  background: var(--color-accent-strong);
+  border-radius: 4px;
+}
+
+.album-card {
+  flex-shrink: 0;
+  width: 200px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.album-card:hover {
+  transform: translateY(-8px);
+}
+
+.album-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.album-title {
+  margin: 12px 0 4px 0;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  color: var(--color-dark);
+}
+
+.album-artist {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-gray);
+  text-align: center;
+}
+
+/* Context Section */
+.context-section {
+  margin-bottom: 48px;
+}
+
+.context-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+.context-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 16px;
+  border: 2px solid var(--color-border);
+  border-radius: 16px;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.context-btn:hover {
+  border-color: var(--color-accent-strong);
+  background-color: var(--color-accent-soft);
+  transform: translateY(-4px);
+}
+
+.context-btn.active {
+  border-color: var(--color-accent-strong);
+  background-color: var(--color-accent-strong);
+}
+
+.context-icon {
+  font-size: 32px;
+}
+
+.context-btn span:last-child {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-dark);
+}
+
+/* Playlist Section */
+.playlist-section {
+  animation: slideUp 0.5s ease-out;
+}
+
+.playlist-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.playlist-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background-color: white;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  transition: all 0.3s;
+}
+
+.playlist-item:hover {
+  border-color: var(--color-accent-strong);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.playlist-item img {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.playlist-item-info {
+  flex: 1;
+}
+
+.playlist-item-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-dark);
+  margin: 0 0 4px 0;
+}
+
+.playlist-item-artist {
+  font-size: 14px;
+  color: var(--color-text-gray);
+  margin: 0;
+}
+
+.playlist-item-score {
+  font-size: 14px;
+  color: var(--color-accent-strong);
+  font-weight: 600;
+  margin-right: 12px;
+}
+
+.playlist-play-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background-color: var(--color-accent-strong);
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.playlist-play-btn:hover {
+  transform: scale(1.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 280px;
+    left: -280px;
+  }
+
+  .sidebar.show ~ .main-content {
+    margin-left: 0;
+  }
+
+  .context-buttons {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  }
+
+  .context-btn {
+    padding: 16px 12px;
+  }
+
+  .context-icon {
+    font-size: 24px;
+  }
+}

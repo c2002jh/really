@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>음악 평가 - NeuroTune</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="../assets/css/common.css" />
+    <link rel="stylesheet" href="song-evaluation.css" />
+  </head>
+  <body>
+    <main class="page-wrapper">
+      <!-- Background icon -->
+      <img
+        src="../../logo_page/icon/neurotune_icon.png"
+        alt="NeuroTune background icon"
+        class="bg-logo-icon"
+      />
+
+      <section class="evaluation-content">
+        <!-- Progress indicator -->
+        <div class="progress-bar">
+          <div class="progress-text">
+            <span id="currentSong">1</span> / <span id="totalSongs">18</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+
+        <!-- Genre label -->
+        <div class="genre-label" id="genreLabel">K-POP</div>
+
+        <!-- Song info -->
+        <div class="song-info fade-in">
+          <div class="album-cover">
+            <img id="albumCover" src="https://via.placeholder.com/300" alt="Album cover" />
+          </div>
+
+          <h2 class="song-title" id="songTitle">곡 제목</h2>
+          <p class="artist-name" id="artistName">아티스트</p>
+        </div>
+
+        <!-- File upload area -->
+        <div class="upload-section">
+          <p class="upload-instruction">EEG 데이터를 업로드해주세요 (4개 파일)</p>
+
+          <div class="upload-grid">
+            <div class="upload-box" data-file="rawdata">
+              <input type="file" id="file-rawdata" accept=".txt" />
+              <label for="file-rawdata">
+                <div class="upload-icon">📄</div>
+                <span class="upload-label">Rawdata.txt</span>
+                <span class="upload-status"></span>
+              </label>
+            </div>
+
+            <div class="upload-box" data-file="fp1">
+              <input type="file" id="file-fp1" accept=".txt" />
+              <label for="file-fp1">
+                <div class="upload-icon">📄</div>
+                <span class="upload-label">Fp1_FFT.txt</span>
+                <span class="upload-status"></span>
+              </label>
+            </div>
+
+            <div class="upload-box" data-file="fp2">
+              <input type="file" id="file-fp2" accept=".txt" />
+              <label for="file-fp2">
+                <div class="upload-icon">📄</div>
+                <span class="upload-label">Fp2_FFT.txt</span>
+                <span class="upload-status"></span>
+              </label>
+            </div>
+
+            <div class="upload-box" data-file="biomarkers">
+              <input type="file" id="file-biomarkers" accept=".txt" />
+              <label for="file-biomarkers">
+                <div class="upload-icon">📄</div>
+                <span class="upload-label">Biomarkers.txt</span>
+                <span class="upload-status"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Next song button -->
+        <button class="btn next-song-btn" id="nextSongBtn" disabled>
+          다음 곡
+        </button>
+
+        <!-- Loading overlay -->
+        <div class="loading-overlay" id="loadingOverlay" style="display: none">
+          <div class="loading"></div>
+          <p>EEG 데이터 분석 중...</p>
+        </div>
+      </section>
+    </main>
+
+    <script src="../assets/js/song-evaluation.js"></script>
+  </body>
+</html>
